@@ -1,4 +1,4 @@
-import {json,fail,bodyJson,slugify,text,arr,productAdmin,settings} from '../../../server/http.js';
+import {json,fail,bodyJson,boundedBody,guardAdminMutation,slugify,text,arr,productAdmin,settings} from '../../../server/http.js';
 import {requireAdmin} from '../../../server/auth.js';
 import {calculateQuote,DEFAULT_COSTS,licenseAllowed} from '../../../server/pricing.js';
 import {lookupModel} from '../../../server/makerworld.js';
@@ -8,6 +8,11 @@ const cents=(v,name)=>Math.round(number(v,name)*100);
 const isUrl=v=>{try{const u=new URL(v);return u.protocol==='https:'||u.protocol==='http:'}catch{return false}};
 const mediaUrl=v=>/^\/media\/products\/[a-f0-9-]{36}\.(jpg|jpeg|png|webp|mp4|webm)$/.test(v)||isUrl(v);
 const link=v=>v&&isUrl(v)?text(v,1000):'';
+const costConfig=v=>{
+ if(!v||typeof v!=='object'||Array.isArray(v))throw Object.assign(new Error('Custos devem ser objeto JSON'),{status:400});
+ const out={};for(const [key,value] of Object.entries(v)){if(!Object.hasOwn(DEFAULT_COSTS,key))throw Object.assign(new Error(`Custo desconhecido: ${key}`),{status:400});out[key]=number(value,key)}
+ calculateQuote({grams:1,hours:1},{...DEFAULT_COSTS,...out});return out;
+};
 function normalizeProduct(v){
  const name=text(v.name,140);if(!name)throw Object.assign(new Error('Nome do produto é obrigatório'),{status:400});
  const slug=slugify(v.slug||name);if(!slug)throw Object.assign(new Error('Slug inválido'),{status:400});
@@ -21,17 +26,20 @@ function normalizeProduct(v){
   if(images.length<1)throw Object.assign(new Error('Adicione ao menos uma foto sua do produto antes de publicar'),{status:400});
   if(number(v.price,'Preço')<=0)throw Object.assign(new Error('Preço positivo é obrigatório'),{status:400});
  }
- return {slug,name,description:text(v.description,8000),category:text(v.category||'Decoração',70),price_cents:cents(v.price??0,'Preço'),stock:Math.floor(number(v.stock??0,'Estoque',0,100000)),status,source_url:source,profile_id:text(v.profileId,30),designer:text(v.designer,140),license_status:licenseStatus,license_reference:licenseReference,images_json:JSON.stringify(images),videos_json:JSON.stringify(videos),shopee_url:link(v.shopee),featured:v.featured?1:0,material:text(v.material||'PETG',30),grams:number(v.grams??0,'Gramas'),print_hours:number(v.hours??0,'Horas'),labor_minutes:number(v.laborMinutes??10,'Trabalho manual'),packaging_cents:cents(v.packaging??1.2,'Embalagem'),extras_cents:cents(v.extras??0,'Insumos'),price_config_json:JSON.stringify(v.priceConfig||{})};
+ return {slug,name,description:text(v.description,8000),category:text(v.category||'Decoração',70),price_cents:cents(v.price??0,'Preço'),stock:Math.floor(number(v.stock??0,'Estoque',0,100000)),status,source_url:source,profile_id:text(v.profileId,30),designer:text(v.designer,140),license_status:licenseStatus,license_reference:licenseReference,images_json:JSON.stringify(images),videos_json:JSON.stringify(videos),shopee_url:link(v.shopee),featured:v.featured?1:0,material:text(v.material||'PETG',30),grams:number(v.grams??0,'Gramas'),print_hours:number(v.hours??0,'Horas'),labor_minutes:number(v.laborMinutes??10,'Trabalho manual'),packaging_cents:cents(v.packaging??1.2,'Embalagem'),extras_cents:cents(v.extras??0,'Insumos'),price_config_json:JSON.stringify(costConfig(v.priceConfig||{}))};
 }
 function normalizePost(v){const title=text(v.title,180),slug=slugify(v.slug||title);if(!slug||!title)throw Object.assign(new Error('Título e slug obrigatórios'),{status:400});return{title,slug,excerpt:text(v.excerpt,350),body:text(v.body,50000),cover_url:mediaUrl(v.cover)?text(v.cover,1000):'',tags_json:JSON.stringify(Array.isArray(v.tags)?v.tags.map(x=>text(x,40)).slice(0,8):[]),status:v.status==='published'?'published':'draft'};}
 const dbReady=env=>env.DB?null:json({error:'Configure o D1 no Cloudflare antes de usar o painel.'},503);
 const errorUnique=e=>String(e?.message||'').toLowerCase().includes('unique constraint');
 async function updateProduct(db,id,v){let p=normalizeProduct(v);const old=await db.prepare('SELECT id,stock FROM products WHERE id=?').bind(id).first();if(!old)return json({error:'Produto não encontrado'},404);
- const cols=Object.keys(p);const query=`UPDATE products SET ${cols.map(x=>`${x}=?`).join(',')},updated_at=CURRENT_TIMESTAMP WHERE id=?`;
- const stmts=[db.prepare(query).bind(...Object.values(p),id)];const delta=p.stock-old.stock;if(delta)stmts.push(db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) VALUES(?,?,?,?)').bind(crypto.randomUUID(),id,delta,'Ajuste no cadastro'));
- await db.batch(stmts);return json({ok:true,id});}
+ const cols=Object.keys(p);const query=`UPDATE products SET ${cols.map(x=>`${x}=?`).join(',')},updated_at=CURRENT_TIMESTAMP WHERE id=? AND stock=?`;
+ const stmts=[db.prepare(query).bind(...Object.values(p),id,old.stock)];const delta=p.stock-old.stock;
+ if(delta)stmts.push(db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) SELECT ?,?,?,? WHERE changes()=1').bind(crypto.randomUUID(),id,delta,'Ajuste no cadastro'));
+ const result=await db.batch(stmts);
+ if(result[0].meta.changes!==1)return json({error:'Estoque alterado por outra operação: atualize a lista e tente novamente'},409);
+ return json({ok:true,id});}
 export async function onRequest(context){const auth=await requireAdmin(context);if(auth.error)return auth.error;
- const {request,env}=context;let path=new URL(request.url).pathname.replace(/^\/api\/admin\/?/,'').split('/').filter(Boolean);const method=request.method;
+ const {request,env}=context;const rejected=guardAdminMutation(request);if(rejected)return rejected;let path=new URL(request.url).pathname.replace(/^\/api\/admin\/?/,'').split('/').filter(Boolean);const method=request.method;
  try{
   if(path[0]==='me'&&method==='GET')return json({email:auth.user.email});
   if(path[0]==='lookup'&&method==='POST'){const b=await bodyJson(request);return json(await lookupModel(String(b.url||'')));}
@@ -39,11 +47,11 @@ export async function onRequest(context){const auth=await requireAdmin(context);
   const missing=dbReady(env);if(missing)return missing;const db=env.DB;
   if(path[0]==='settings'){
    if(method==='GET'){return json({settings:await settings(db)});}
-   if(method==='PUT'){const b=await bodyJson(request);const keys=['brand','tagline','shopee_url','whatsapp','instagram','tiktok','youtube','default_costs'];const statements=[];for(const k of keys){if(b[k]===undefined)continue;let value=k==='default_costs'?JSON.stringify({...DEFAULT_COSTS,...b[k]}):text(b[k],500);if(k.endsWith('_url')||['instagram','tiktok','youtube'].includes(k)){if(value&&!isUrl(value))throw Object.assign(new Error(`URL inválida: ${k}`),{status:400})}statements.push(db.prepare('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').bind(k,value));}if(statements.length)await db.batch(statements);return json({ok:true});}
+   if(method==='PUT'){const b=await bodyJson(request);const keys=['brand','tagline','shopee_url','whatsapp','instagram','tiktok','youtube','default_costs'];const statements=[];for(const k of keys){if(b[k]===undefined)continue;let value=k==='default_costs'?JSON.stringify({...DEFAULT_COSTS,...costConfig(b[k])}):text(b[k],500);if(k.endsWith('_url')||['instagram','tiktok','youtube'].includes(k)){if(value&&!isUrl(value))throw Object.assign(new Error(`URL inválida: ${k}`),{status:400})}statements.push(db.prepare('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').bind(k,value));}if(statements.length)await db.batch(statements);return json({ok:true});}
   }
   if(path[0]==='products'){
    if(method==='GET'){const q=await db.prepare('SELECT * FROM products ORDER BY updated_at DESC LIMIT 300').all();return json({products:q.results.map(productAdmin)});}
-   if(method==='POST'){const p=normalizeProduct(await bodyJson(request));const id=crypto.randomUUID();const fields=['id',...Object.keys(p)];await db.prepare(`INSERT INTO products(${fields.join(',')}) VALUES(${fields.map(()=>'?').join(',')})`).bind(id,...Object.values(p)).run();if(p.stock)await db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) VALUES(?,?,?,?)').bind(crypto.randomUUID(),id,p.stock,'Estoque inicial').run();return json({ok:true,id},201);}
+   if(method==='POST'){const p=normalizeProduct(await bodyJson(request));const id=crypto.randomUUID();const fields=['id',...Object.keys(p)];const insert=db.prepare(`INSERT INTO products(${fields.join(',')}) VALUES(${fields.map(()=>'?').join(',')})`).bind(id,...Object.values(p));const writes=[insert];if(p.stock)writes.push(db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) VALUES(?,?,?,?)').bind(crypto.randomUUID(),id,p.stock,'Estoque inicial'));await db.batch(writes);return json({ok:true,id},201);}
    if(path[1]&&method==='PUT')return await updateProduct(db,path[1],await bodyJson(request));
    if(path[1]&&method==='DELETE'){await db.prepare("UPDATE products SET status='archived',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(path[1]).run();return json({ok:true});}
   }
@@ -51,7 +59,7 @@ export async function onRequest(context){const auth=await requireAdmin(context);
    if(method==='GET'){const q=await db.prepare('SELECT * FROM quotes ORDER BY created_at DESC LIMIT 60').all();return json({quotes:q.results.map(x=>({id:x.id,title:x.title,sourceUrl:x.source_url,input:JSON.parse(x.input_json),costs:JSON.parse(x.costs_json),result:JSON.parse(x.result_json),createdAt:x.created_at}))});}
    if(method==='POST'){
     const b=await bodyJson(request),title=text(b.title||'Orçamento',140),sourceUrl=link(b.sourceUrl);
-    const costs={...DEFAULT_COSTS,...(b.costs||{})},q=calculateQuote(b.input||{},costs),id=crypto.randomUUID();
+    const costs={...DEFAULT_COSTS,...costConfig(b.costs||{})},q=calculateQuote(b.input||{},costs),id=crypto.randomUUID();
     await db.prepare('INSERT INTO quotes(id,title,source_url,input_json,costs_json,result_json) VALUES(?,?,?,?,?,?)').bind(id,title,sourceUrl,JSON.stringify(b.input),JSON.stringify(costs),JSON.stringify(q)).run();
     return json({id,quote:q},201);
    }
@@ -85,7 +93,7 @@ export async function onRequest(context){const auth=await requireAdmin(context);
   }
   if(path[0]==='inventory'){
    if(method==='GET'){const q=await db.prepare('SELECT l.id,l.product_id,p.name,l.delta,l.reason,l.created_at FROM inventory_log l JOIN products p ON p.id=l.product_id ORDER BY l.created_at DESC LIMIT 100').all();return json({history:q.results});}
-   if(method==='POST'){const b=await bodyJson(request);const id=text(b.productId,70),delta=Number(b.delta);if(!Number.isInteger(delta)||!delta||Math.abs(delta)>100000)throw Object.assign(new Error('Informe um ajuste inteiro diferente de zero'),{status:400});const product=await db.prepare('SELECT stock FROM products WHERE id=?').bind(id).first();if(!product)return json({error:'Produto não encontrado'},404);if(product.stock+delta<0)return json({error:'Estoque insuficiente'},409);await db.batch([db.prepare('UPDATE products SET stock=stock+?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(delta,id),db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) VALUES(?,?,?,?)').bind(crypto.randomUUID(),id,delta,text(b.reason||'Ajuste manual',150))]);return json({ok:true,stock:product.stock+delta});}
+   if(method==='POST'){const b=await bodyJson(request);const id=text(b.productId,70),delta=Number(b.delta);if(!Number.isInteger(delta)||!delta||Math.abs(delta)>100000)throw Object.assign(new Error('Informe um ajuste inteiro diferente de zero'),{status:400});const product=await db.prepare('SELECT stock FROM products WHERE id=?').bind(id).first();if(!product)return json({error:'Produto não encontrado'},404);if(product.stock+delta<0)return json({error:'Estoque insuficiente'},409);const result=await db.batch([db.prepare('UPDATE products SET stock=stock+?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND stock=? AND stock+?>=0').bind(delta,id,product.stock,delta),db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) SELECT ?,?,?,? WHERE changes()=1').bind(crypto.randomUUID(),id,delta,text(b.reason||'Ajuste manual',150))]);if(result[0].meta.changes!==1)return json({error:'Estoque mudou durante o ajuste; recarregue e tente novamente'},409);return json({ok:true,stock:product.stock+delta});}
   }
   if(path[0]==='blog'){
    if(method==='GET'){const q=await db.prepare('SELECT * FROM posts ORDER BY updated_at DESC LIMIT 200').all();return json({posts:q.results.map(p=>({id:p.id,slug:p.slug,title:p.title,excerpt:p.excerpt,body:p.body,cover:p.cover_url,tags:arr(p.tags_json),status:p.status,publishedAt:p.published_at}))});}
@@ -95,14 +103,16 @@ export async function onRequest(context){const auth=await requireAdmin(context);
   }
   if(path[0]==='media'&&method==='POST'){
    if(!env.MEDIA)return json({error:'Configure o R2 MEDIA para enviar arquivos.'},503);
-   const length=Number(request.headers.get('content-length')||0);if(length>20*1024*1024)return json({error:'Arquivo acima do limite de 20MB'},413);
-   const form=await request.formData();const file=form.get('file');if(!file||typeof file.arrayBuffer!=='function')return json({error:'Arquivo obrigatório'},400);
-   if(file.size>20*1024*1024)return json({error:'Arquivo acima do limite de 20MB'},413);
+   const maxFile=20*1024*1024;const formLimit=maxFile+128*1024;
+   const bytes=await boundedBody(request,formLimit);
+   const sanitized=new Request(request.url,{method:'POST',headers:{'Content-Type':request.headers.get('content-type')},body:bytes});
+   let form;try{form=await sanitized.formData()}catch{throw Object.assign(new Error('Multipart inválido'),{status:400})}const file=form.get('file');if(!file||typeof file.arrayBuffer!=='function')return json({error:'Arquivo obrigatório'},400);
+   if(file.size>maxFile)return json({error:'Arquivo acima do limite de 20MB'},413);
    const types={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','video/mp4':'mp4','video/webm':'webm'};let ext=types[file.type];if(!ext)return json({error:'Envie JPEG, PNG, WebP, MP4 ou WebM'},415);
    const b=new Uint8Array(await file.arrayBuffer()),head=[...b.slice(0,12)];let valid=ext==='jpg'?head[0]===255&&head[1]===216:ext==='png'?head.slice(0,4).join(',')==='137,80,78,71':ext==='webp'?new TextDecoder().decode(b.slice(0,4))==='RIFF'&&new TextDecoder().decode(b.slice(8,12))==='WEBP':ext==='mp4'?new TextDecoder().decode(b.slice(4,8))==='ftyp':ext==='webm'?head.slice(0,4).join(',')==='26,69,223,163':false;
    if(!valid)return json({error:'Assinatura do arquivo não corresponde ao formato'},415);
    const key=`products/${crypto.randomUUID()}.${ext}`;await env.MEDIA.put(key,b,{httpMetadata:{contentType:file.type},customMetadata:{uploadedBy:auth.user.email}});return json({url:`/media/${key}`,bytes:file.size},201);
   }
   return json({error:'Rota não encontrada'},404);
- }catch(e){if(errorUnique(e))return json({error:path[0]==='sales'?'Pedido já registrado para este produto; não duplique a venda.':'Slug já cadastrado; use outro nome ou endereço'},409);if(String(e.message).includes('insufficient_stock'))return json({error:'Estoque insuficiente'},409);return fail(e)}
+ }catch(e){if(String(e.message).includes('invalid_published_product'))return json({error:'Produto publicado sem preço, foto ou licença válida'},400);if(String(e.message).includes('invalid_sale_totals'))return json({error:'Valores financeiros inconsistentes'},400);if(errorUnique(e))return json({error:path[0]==='sales'?'Pedido já registrado para este produto; não duplique a venda.':'Slug já cadastrado; use outro nome ou endereço'},409);if(/insufficient_stock|CHECK constraint failed:.*stock/i.test(String(e.message)))return json({error:'Estoque insuficiente'},409);return fail(e)}
 }

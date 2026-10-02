@@ -8,12 +8,12 @@ export async function verifyAdmin(request,env){
  const devToken=request.headers.get('X-Local-Admin-Token');
  if(local&&env.LOCAL_DEV==='true'&&env.LOCAL_DEV_TOKEN&&devToken===env.LOCAL_DEV_TOKEN)return {email:'local-admin',local:true};
  const token=request.headers.get('Cf-Access-Jwt-Assertion');
- if(!token||!env.CF_ACCESS_TEAM_DOMAIN||!env.CF_ACCESS_AUD||!env.ADMIN_EMAIL)return null;
+ if(!token||!env.CF_ACCESS_TEAM_DOMAIN||!env.CF_ACCESS_AUD||!env.ADMIN_EMAIL||token.length>12000)return null;
  const parts=token.split('.');if(parts.length!==3)return null;
  let head,payload;try{head=parsePart(parts[0]);payload=parsePart(parts[1]);}catch{return null;}
  const domain=String(env.CF_ACCESS_TEAM_DOMAIN).replace(/^https?:\/\//,'').replace(/\/$/,'');
  const iss=`https://${domain}`;const now=Math.floor(Date.now()/1000);
- if(head.alg!=='RS256'||!head.kid||payload.iss!==iss||!Array.isArray(payload.aud)||!payload.aud.includes(env.CF_ACCESS_AUD)||!Number.isFinite(payload.exp)||payload.exp<=now||!Number.isFinite(payload.iat)||payload.iat>now+60||!payload.email||payload.email.toLowerCase()!==String(env.ADMIN_EMAIL).toLowerCase())return null;
+ if(head.alg!=='RS256'||(typeof head.kid!=='string'||!head.kid||head.kid.length>256)||payload.iss!==iss||!Array.isArray(payload.aud)||!payload.aud.includes(env.CF_ACCESS_AUD)||payload.type!=='app'||!Number.isFinite(payload.exp)||payload.exp<=now||!Number.isFinite(payload.iat)||payload.iat>now+60||payload.iat>payload.exp||(payload.nbf!==undefined&&(!Number.isFinite(payload.nbf)||payload.nbf>now+60))||typeof payload.email!=='string'||payload.email.trim().toLowerCase()!==String(env.ADMIN_EMAIL).trim().toLowerCase())return null;
  try{
    let jwks=cache.get(domain);if(!jwks||jwks.until<Date.now()){
      const response=await fetch(`${iss}/cdn-cgi/access/certs`,{signal:AbortSignal.timeout(4500)});

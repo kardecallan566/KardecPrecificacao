@@ -8,7 +8,7 @@ test('rotas administrativas negam solicitação sem JWT autenticado',async()=>{
 });
 test('modo local exige localhost e token explícito',async()=>{
  const payload=JSON.stringify({input:{grams:100,hours:2},costs:{marketplacePercent:20}});
- const opts={method:'POST',headers:{'Content-Type':'application/json','X-Local-Admin-Token':'correto'},body:payload};
+ const opts={method:'POST',headers:{'Content-Type':'application/json','X-Local-Admin-Token':'correto','X-Zynutz-Admin':'1'},body:payload};
  const env={LOCAL_DEV:'true',LOCAL_DEV_TOKEN:'correto'};
  assert.equal((await admin({request:new Request('https://zynutz.pages.dev/api/admin/quote',opts),env})).status,401);
  const good=await admin({request:new Request('http://localhost:8788/api/admin/quote',opts),env});assert.equal(good.status,200);assert.ok((await good.json()).suggested>0);

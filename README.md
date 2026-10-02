@@ -80,3 +80,11 @@ O importador lê ID e título pelo link e tenta consultar os metadados de peso e
 - O site funciona em código e em testes com SQLite de memória. Para operar online ainda é necessário conectar **seus** D1/R2 e Cloudflare Access, aplicar as migrações, informar suas fotos e conferir permissões de comercialização. Não há checkout nem pagamentos no site: os botões de compra encaminham à Shopee.
 - A área de vendas é um controle gerencial de contribuição, **não** substitui o extrato da Shopee ou a contabilidade; pedidos devolvidos/cancelados devem ser conciliados antes de lançar como pedidos concluídos. A importação automática de relatórios, edição/estorno de pedidos e sincronização via API dependem de checkpoints futuros.
 - Não cole tokens, cookies, senhas da Shopee, credenciais do MakerWorld ou imagens não autorizadas nos campos públicos.
+
+## Segurança — revisão de outubro de 2026
+
+Consulte [SECURITY_REVIEW.md](SECURITY_REVIEW.md) para a auditoria de endpoints, JWT Cloudflare Access, formulários, uploads R2 e integridade do D1. Os testes automatizados incluem casos de CSRF, JWT adulterado, payload excessivo, concorrência, imagens inválidas e constraints da base.
+
+**Obrigatório antes da publicação:** aplicar `migrations/0003_security.sql` depois das anteriores, fazer backup do D1, restringir com Access `/admin/*` e `/api/admin/*` em produção e preview, manter `LOCAL_DEV` desligado, configurar limites de requisições no WAF e usar secrets no Pages. Todos os POST/PUT/DELETE do painel exigem `X-Zynutz-Admin: 1`, `Origin` coerente quando presente e tipos de conteúdo adequados.
+
+O arquivo `_headers` só protege arquivos estáticos no Pages; as páginas HTML dinâmicas agora recebem CSP, X-Frame-Options e demais cabeçalhos diretamente da Function. **Mídias carregadas em R2 são acessíveis a quem possuir o link aleatório**, incluindo fotos de produtos ainda em rascunho; não envie dados pessoais ou fotografias confidenciais.

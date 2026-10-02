@@ -7,6 +7,7 @@ export function calculateQuote(input,overrides={}){
  const grams=positive(input.grams,'Peso em gramas',1e6), hours=positive(input.hours,'Horas de impressão',1e4);
  const units=positive(input.units||1,'Unidades por impressão',10000);
  if(!Number.isInteger(units)||units<1)throw new Error('Unidades deve ser inteiro positivo');
+ if(grams<=0||hours<=0)throw new Error('Informe peso e tempo de impressão maiores que zero');
  const g=grams/units,h=hours/units;
  for(const [k,v] of Object.entries(c)) c[k]=positive(v,k);
  if(c.wastePercent>=100||c.failurePercent>=100||c.marketplacePercent+c.taxPercent>=100)throw new Error('Percentuais de custo ou taxa inválidos');
@@ -30,7 +31,7 @@ export function calculateQuote(input,overrides={}){
  const marketplace=price*c.marketplacePercent/100+fixed;
  const taxes=price*c.taxPercent/100;
  const contribution=price-marketplace-taxes-production;
- return {input:{grams,hours,units},costs:{material:round2(material),energy:round2(energy),failures:round2(failure),machine:round2(machine),labor:round2(labor),packaging:round2(packing),extras:round2(extras),ads:round2(ads),production:round2(production),marketplace:round2(marketplace),taxes:round2(taxes)},breakEven:round2(breakEven),suggested:round2(suggested),salePrice:round2(price),contribution:round2(contribution),netMarginPercent:price?round2(contribution/price*100):0,printerHourly:hours>0?round2(contribution/h):0,assumptions: price>=80?'Estimativa: valores acima de R$ 79,99 podem ter outra tarifa fixa; confira sua faixa Shopee, tributos e custos reais.':'Estimativa: taxas editáveis; confira sua faixa Shopee, tributos e custos reais.'};
+ return {input:{grams,hours,units},costs:{material:round2(material),energy:round2(energy),failures:round2(failure),machine:round2(machine),labor:round2(labor),packaging:round2(packing),extras:round2(extras),ads:round2(ads),production:round2(production),marketplace:round2(marketplace),taxes:round2(taxes)},breakEven:round2(breakEven),suggested:round2(suggested),salePrice:round2(price),contribution:round2(contribution),netMarginPercent:price?round2(contribution/price*100):0,printerHourly:hours>0?round2(contribution*units/hours):0,assumptions: price>=80?'Estimativa: valores acima de R$ 79,99 podem ter outra tarifa fixa; confira sua faixa Shopee, tributos e custos reais.':'Estimativa: taxas editáveis; confira sua faixa Shopee, tributos e custos reais.'};
 }
 export function parseMakerworldUrl(text){
  let url;try{url=new URL(text)}catch{throw new Error('Cole uma URL válida do MakerWorld');}

@@ -2,6 +2,7 @@ import {json,fail,bodyJson,slugify,text,arr,productAdmin,settings} from '../../.
 import {requireAdmin} from '../../../server/auth.js';
 import {calculateQuote,DEFAULT_COSTS,licenseAllowed} from '../../../server/pricing.js';
 import {lookupModel} from '../../../server/makerworld.js';
+import {normalizeSale} from '../../../server/sales.js';
 const number=(v,name,min=0,max=1e7)=>{const n=Number(v);if(!Number.isFinite(n)||n<min||n>max)throw Object.assign(new Error(`${name} inválido`),{status:400});return n};
 const cents=(v,name)=>Math.round(number(v,name)*100);
 const isUrl=v=>{try{const u=new URL(v);return u.protocol==='https:'||u.protocol==='http:'}catch{return false}};
@@ -22,7 +23,7 @@ function normalizeProduct(v){
  }
  return {slug,name,description:text(v.description,8000),category:text(v.category||'Decoração',70),price_cents:cents(v.price??0,'Preço'),stock:Math.floor(number(v.stock??0,'Estoque',0,100000)),status,source_url:source,profile_id:text(v.profileId,30),designer:text(v.designer,140),license_status:licenseStatus,license_reference:licenseReference,images_json:JSON.stringify(images),videos_json:JSON.stringify(videos),shopee_url:link(v.shopee),featured:v.featured?1:0,material:text(v.material||'PETG',30),grams:number(v.grams??0,'Gramas'),print_hours:number(v.hours??0,'Horas'),labor_minutes:number(v.laborMinutes??10,'Trabalho manual'),packaging_cents:cents(v.packaging??1.2,'Embalagem'),extras_cents:cents(v.extras??0,'Insumos'),price_config_json:JSON.stringify(v.priceConfig||{})};
 }
-function normalizePost(v){const title=text(v.title,180),slug=slugify(v.slug||title);if(!slug||!title)throw Object.assign(new Error('Título e slug obrigatórios'),{status:400});return{title,slug,excerpt:text(v.excerpt,350),body:text(v.body,50000),cover_url:link(v.cover),tags_json:JSON.stringify(Array.isArray(v.tags)?v.tags.map(x=>text(x,40)).slice(0,8):[]),status:v.status==='published'?'published':'draft'};}
+function normalizePost(v){const title=text(v.title,180),slug=slugify(v.slug||title);if(!slug||!title)throw Object.assign(new Error('Título e slug obrigatórios'),{status:400});return{title,slug,excerpt:text(v.excerpt,350),body:text(v.body,50000),cover_url:mediaUrl(v.cover)?text(v.cover,1000):'',tags_json:JSON.stringify(Array.isArray(v.tags)?v.tags.map(x=>text(x,40)).slice(0,8):[]),status:v.status==='published'?'published':'draft'};}
 const dbReady=env=>env.DB?null:json({error:'Configure o D1 no Cloudflare antes de usar o painel.'},503);
 const errorUnique=e=>String(e?.message||'').toLowerCase().includes('unique constraint');
 async function updateProduct(db,id,v){let p=normalizeProduct(v);const old=await db.prepare('SELECT id,stock FROM products WHERE id=?').bind(id).first();if(!old)return json({error:'Produto não encontrado'},404);
@@ -46,6 +47,42 @@ export async function onRequest(context){const auth=await requireAdmin(context);
    if(path[1]&&method==='PUT')return await updateProduct(db,path[1],await bodyJson(request));
    if(path[1]&&method==='DELETE'){await db.prepare("UPDATE products SET status='archived',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(path[1]).run();return json({ok:true});}
   }
+  if(path[0]==='quotes'){
+   if(method==='GET'){const q=await db.prepare('SELECT * FROM quotes ORDER BY created_at DESC LIMIT 60').all();return json({quotes:q.results.map(x=>({id:x.id,title:x.title,sourceUrl:x.source_url,input:JSON.parse(x.input_json),costs:JSON.parse(x.costs_json),result:JSON.parse(x.result_json),createdAt:x.created_at}))});}
+   if(method==='POST'){
+    const b=await bodyJson(request),title=text(b.title||'Orçamento',140),sourceUrl=link(b.sourceUrl);
+    const costs={...DEFAULT_COSTS,...(b.costs||{})},q=calculateQuote(b.input||{},costs),id=crypto.randomUUID();
+    await db.prepare('INSERT INTO quotes(id,title,source_url,input_json,costs_json,result_json) VALUES(?,?,?,?,?,?)').bind(id,title,sourceUrl,JSON.stringify(b.input),JSON.stringify(costs),JSON.stringify(q)).run();
+    return json({id,quote:q},201);
+   }
+  }
+  if(path[0]==='sales'){
+   if(method==='GET'){
+    const q=await db.prepare('SELECT s.*,p.name as product_name FROM sales s JOIN products p ON p.id=s.product_id ORDER BY s.sold_at DESC,s.created_at DESC LIMIT 500').all();
+    return json({sales:q.results.map(x=>({id:x.id,channel:x.channel,externalOrder:x.external_order,productId:x.product_id,productName:x.product_name,quantity:x.quantity,gross:x.gross_cents/100,fee:x.fee_cents/100,shipping:x.seller_shipping_cents/100,other:x.other_cents/100,unitCost:x.unit_cost_cents/100,contribution:x.contribution_cents/100,soldAt:x.sold_at,note:x.note}))});
+   }
+   if(method==='POST'){
+    const b=await bodyJson(request),product=await db.prepare('SELECT * FROM products WHERE id=?').bind(text(b.productId,80)).first();
+    if(!product)return json({error:'Produto não encontrado'},404);
+    if(product.status==='archived')return json({error:'Produto arquivado: reative antes de lançar vendas'},409);
+    const current=await settings(db);let defaults={};try{defaults=JSON.parse(current.default_costs||'{}')}catch{}
+    const sale=normalizeSale(b,product,defaults);
+    if(product.stock<sale.quantity)return json({error:'Estoque insuficiente; registre a produção antes da venda'},409);
+    const id=crypto.randomUUID(),fields=['id',...Object.keys(sale)];
+    // D1 batch é transacional. O trigger na migration 0002 impede estoque negativo sob concorrência.
+    await db.batch([
+     db.prepare(`INSERT INTO sales(${fields.join(',')}) VALUES(${fields.map(()=>'?').join(',')})`).bind(id,...Object.values(sale)),
+     db.prepare('UPDATE products SET stock=stock-?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(sale.quantity,product.id),
+     db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) VALUES(?,?,?,?)').bind(crypto.randomUUID(),product.id,-sale.quantity,`Venda ${sale.channel}${sale.external_order?' #'+sale.external_order:''}`)
+    ]);
+    return json({ok:true,id,contribution:sale.contribution_cents/100},201);
+   }
+  }
+  if(path[0]==='analytics'&&method==='GET'){
+   const q=await db.prepare('SELECT COUNT(*) orders_count,COALESCE(SUM(quantity),0) units,COALESCE(SUM(gross_cents),0) gross_cents,COALESCE(SUM(fee_cents),0) fee_cents,COALESCE(SUM(seller_shipping_cents+other_cents),0) extra_cents,COALESCE(SUM(unit_cost_cents*quantity),0) production_cents,COALESCE(SUM(contribution_cents),0) contribution_cents FROM sales').first();
+   const months=await db.prepare("SELECT substr(sold_at,1,7) month,COUNT(*) orders_count,SUM(gross_cents) gross_cents,SUM(contribution_cents) contribution_cents FROM sales GROUP BY substr(sold_at,1,7) ORDER BY month DESC LIMIT 12").all();
+   return json({summary:{orders:q.orders_count,units:q.units,gross:q.gross_cents/100,fees:q.fee_cents/100,extra:q.extra_cents/100,production:q.production_cents/100,contribution:q.contribution_cents/100},months:months.results.map(x=>({month:x.month,orders:x.orders_count,gross:x.gross_cents/100,contribution:x.contribution_cents/100}))});
+  }
   if(path[0]==='inventory'){
    if(method==='GET'){const q=await db.prepare('SELECT l.id,l.product_id,p.name,l.delta,l.reason,l.created_at FROM inventory_log l JOIN products p ON p.id=l.product_id ORDER BY l.created_at DESC LIMIT 100').all();return json({history:q.results});}
    if(method==='POST'){const b=await bodyJson(request);const id=text(b.productId,70),delta=Number(b.delta);if(!Number.isInteger(delta)||!delta||Math.abs(delta)>100000)throw Object.assign(new Error('Informe um ajuste inteiro diferente de zero'),{status:400});const product=await db.prepare('SELECT stock FROM products WHERE id=?').bind(id).first();if(!product)return json({error:'Produto não encontrado'},404);if(product.stock+delta<0)return json({error:'Estoque insuficiente'},409);await db.batch([db.prepare('UPDATE products SET stock=stock+?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(delta,id),db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) VALUES(?,?,?,?)').bind(crypto.randomUUID(),id,delta,text(b.reason||'Ajuste manual',150))]);return json({ok:true,stock:product.stock+delta});}
@@ -67,5 +104,5 @@ export async function onRequest(context){const auth=await requireAdmin(context);
    const key=`products/${crypto.randomUUID()}.${ext}`;await env.MEDIA.put(key,b,{httpMetadata:{contentType:file.type},customMetadata:{uploadedBy:auth.user.email}});return json({url:`/media/${key}`,bytes:file.size},201);
   }
   return json({error:'Rota não encontrada'},404);
- }catch(e){if(errorUnique(e))return json({error:'Slug já cadastrado; use outro nome ou endereço'},409);return fail(e)}
+ }catch(e){if(errorUnique(e))return json({error:path[0]==='sales'?'Pedido já registrado para este produto; não duplique a venda.':'Slug já cadastrado; use outro nome ou endereço'},409);if(String(e.message).includes('insufficient_stock'))return json({error:'Estoque insuficiente'},409);return fail(e)}
 }

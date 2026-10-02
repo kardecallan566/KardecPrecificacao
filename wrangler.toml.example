@@ -1,0 +1,19 @@
+# Copie para wrangler.toml depois de criar D1/R2 no seu Cloudflare.
+name = "zynutz-3d"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zynutz-3d-db"
+database_id = "COLE-SEU-DATABASE-ID"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "zynutz-3d-media"
+
+# Secrets via Cloudflare Pages > Settings > Variables and Secrets:
+# CF_ACCESS_TEAM_DOMAIN = "seu-time.cloudflareaccess.com"
+# CF_ACCESS_AUD = "AUD_DO_APP_ACCESS"
+# ADMIN_EMAIL = "seu-email@exemplo.com"
+# LOCAL_DEV_TOKEN somente durante testes locais (NUNCA commit).

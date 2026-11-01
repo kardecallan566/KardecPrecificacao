@@ -40,3 +40,22 @@ test('fluxo administrativo completo: catálogo, orçamento, venda, estoque, rela
   const denied=await admin({request:new Request('https://example.pages.dev/api/admin/sales'),env:{DB:db}});assert.equal(denied.status,401);
  }finally{db.close();}
 });
+
+
+test('clientes e tarefas: CRUD seguro e contexto da IA',async()=>{
+ const db=memoryD1();try{
+  const customer=await call(db,'customers','POST',{name:'Cliente de teste',phone:'61999990000',email:'cliente@example.com',notes:'Preferência PETG'});
+  assert.equal(customer.status,201);
+  const list=await call(db,'customers');assert.equal(list.data.customers.length,1);assert.equal(list.data.customers[0].name,'Cliente de teste');
+  const badEmail=await call(db,'customers','POST',{name:'Inválido',email:'não-é-email'});assert.equal(badEmail.status,400);
+  const task=await call(db,'tasks','POST',{title:'Preparar lote PETG',priority:'high',dueDate:'2026-11-15'});
+  assert.equal(task.status,201);
+  const tasks=await call(db,'tasks');assert.equal(tasks.data.tasks.length,1);assert.equal(tasks.data.tasks[0].priority,'high');
+  const invalidDate=await call(db,'tasks','POST',{title:'Data inválida',dueDate:'2026-99-99'});assert.equal(invalidDate.status,400);
+  const done=await call(db,'tasks/'+task.data.id,'PUT',{title:'Preparar lote PETG',status:'done',priority:'high'});
+  assert.equal(done.status,200);assert.equal((await call(db,'tasks')).data.tasks[0].status,'done');
+  const context=await call(db,'assistant');assert.equal(context.status,200);assert.equal(context.data.tasks.length,0);
+  const archived=await call(db,'customers/'+customer.data.id,'DELETE');assert.equal(archived.status,200);
+  assert.equal((await call(db,'customers')).data.customers[0].status,'inactive');
+ }finally{db.close();}
+});

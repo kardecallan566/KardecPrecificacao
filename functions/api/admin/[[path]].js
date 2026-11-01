@@ -95,6 +95,71 @@ export async function onRequest(context){const auth=await requireAdmin(context);
    if(method==='GET'){const q=await db.prepare('SELECT l.id,l.product_id,p.name,l.delta,l.reason,l.created_at FROM inventory_log l JOIN products p ON p.id=l.product_id ORDER BY l.created_at DESC LIMIT 100').all();return json({history:q.results});}
    if(method==='POST'){const b=await bodyJson(request);const id=text(b.productId,70),delta=Number(b.delta);if(!Number.isInteger(delta)||!delta||Math.abs(delta)>100000)throw Object.assign(new Error('Informe um ajuste inteiro diferente de zero'),{status:400});const product=await db.prepare('SELECT stock FROM products WHERE id=?').bind(id).first();if(!product)return json({error:'Produto não encontrado'},404);if(product.stock+delta<0)return json({error:'Estoque insuficiente'},409);const result=await db.batch([db.prepare('UPDATE products SET stock=stock+?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND stock=? AND stock+?>=0').bind(delta,id,product.stock,delta),db.prepare('INSERT INTO inventory_log(id,product_id,delta,reason) SELECT ?,?,?,? WHERE changes()=1').bind(crypto.randomUUID(),id,delta,text(b.reason||'Ajuste manual',150))]);if(result[0].meta.changes!==1)return json({error:'Estoque mudou durante o ajuste; recarregue e tente novamente'},409);return json({ok:true,stock:product.stock+delta});}
   }
+  if(path[0]==='customers'){
+   if(method==='GET'){
+    const q=await db.prepare('SELECT * FROM customers ORDER BY updated_at DESC LIMIT 500').all();
+    return json({customers:q.results});
+   }
+   if(method==='POST'){
+    const b=await bodyJson(request),name=text(b.name,140);
+    if(!name)throw Object.assign(new Error('Nome do cliente é obrigatório'),{status:400});
+    const id=crypto.randomUUID(),phone=text(b.phone,40),email=text(b.email,160),notes=text(b.notes,1000);
+    if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Object.assign(new Error('E-mail inválido'),{status:400});
+    await db.prepare('INSERT INTO customers(id,name,phone,email,notes) VALUES(?,?,?,?,?)').bind(id,name,phone,email,notes).run();
+    return json({ok:true,id},201);
+   }
+   if(path[1]&&method==='PUT'){
+    const b=await bodyJson(request),name=text(b.name,140);
+    if(!name)throw Object.assign(new Error('Nome do cliente é obrigatório'),{status:400});
+    const email=text(b.email,160);if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Object.assign(new Error('E-mail inválido'),{status:400});
+    const status=['active','inactive'].includes(b.status)?b.status:'active';
+    const r=await db.prepare('UPDATE customers SET name=?,phone=?,email=?,notes=?,status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(name,text(b.phone,40),email,text(b.notes,1000),status,path[1]).run();
+    return r.meta.changes?json({ok:true}):json({error:'Cliente não encontrado'},404);
+   }
+   if(path[1]&&method==='DELETE'){
+    const r=await db.prepare("UPDATE customers SET status='inactive',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(path[1]).run();
+    return r.meta.changes?json({ok:true,archived:true}):json({error:'Cliente não encontrado'},404);
+   }
+  }
+  if(path[0]==='tasks'){
+   if(method==='GET'){
+    const q=await db.prepare('SELECT * FROM tasks ORDER BY CASE status WHEN \'pending\' THEN 0 WHEN \'in_progress\' THEN 1 ELSE 2 END, CASE priority WHEN \'high\' THEN 0 WHEN \'normal\' THEN 1 ELSE 2 END, COALESCE(due_date,\'9999-12-31\'),updated_at DESC LIMIT 500').all();
+    return json({tasks:q.results});
+   }
+   if(method==='POST'){
+    const b=await bodyJson(request),title=text(b.title,180);
+    if(!title)throw Object.assign(new Error('Título da tarefa é obrigatório'),{status:400});
+    const status=['pending','in_progress','done','cancelled'].includes(b.status)?b.status:'pending';
+    const priority=['low','normal','high'].includes(b.priority)?b.priority:'normal';
+    const dueDate=b.dueDate?text(b.dueDate,10):null;
+    if(dueDate&&(!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)||Number.isNaN(Date.parse(dueDate))||new Date(dueDate+'T00:00:00Z').toISOString().slice(0,10)!==dueDate))throw Object.assign(new Error('Data limite inválida'),{status:400});
+    const id=crypto.randomUUID();
+    await db.prepare('INSERT INTO tasks(id,title,description,status,priority,due_date,completed_at) VALUES(?,?,?,?,?,?,?)').bind(id,title,text(b.description,2000),status,priority,dueDate,status==='done'?new Date().toISOString():null).run();
+    return json({ok:true,id},201);
+   }
+   if(path[1]&&method==='PUT'){
+    const b=await bodyJson(request),title=text(b.title,180);
+    if(!title)throw Object.assign(new Error('Título da tarefa é obrigatório'),{status:400});
+    const status=['pending','in_progress','done','cancelled'].includes(b.status)?b.status:'pending';
+    const priority=['low','normal','high'].includes(b.priority)?b.priority:'normal';
+    const dueDate=b.dueDate?text(b.dueDate,10):null;
+    if(dueDate&&(!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)||Number.isNaN(Date.parse(dueDate))||new Date(dueDate+'T00:00:00Z').toISOString().slice(0,10)!==dueDate))throw Object.assign(new Error('Data limite inválida'),{status:400});
+    const r=await db.prepare("UPDATE tasks SET title=?,description=?,status=?,priority=?,due_date=?,updated_at=CURRENT_TIMESTAMP,completed_at=CASE WHEN ?='done' THEN COALESCE(completed_at,CURRENT_TIMESTAMP) ELSE NULL END WHERE id=?").bind(title,text(b.description,2000),status,priority,dueDate,status,path[1]).run();
+    return r.meta.changes?json({ok:true}):json({error:'Tarefa não encontrada'},404);
+   }
+   if(path[1]&&method==='DELETE'){
+    const r=await db.prepare('DELETE FROM tasks WHERE id=?').bind(path[1]).run();
+    return r.meta.changes?json({ok:true}):json({error:'Tarefa não encontrada'},404);
+   }
+  }
+  if(path[0]==='assistant'&&method==='GET'){
+   const [products,tasks,summary]=await Promise.all([
+    db.prepare("SELECT id,name,price_cents,stock,status FROM products WHERE status!='archived' ORDER BY updated_at DESC LIMIT 100").all(),
+    db.prepare("SELECT id,title,status,priority,due_date FROM tasks WHERE status IN ('pending','in_progress') ORDER BY due_date LIMIT 100").all(),
+    db.prepare('SELECT COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross,COALESCE(SUM(contribution_cents),0) contribution FROM sales').first()
+   ]);
+   return json({products:products.results.map(p=>({...p,price:p.price_cents/100})),tasks:tasks.results, sales:{orders:summary.orders,gross:summary.gross/100,contribution:summary.contribution/100}});
+  }
   if(path[0]==='blog'){
    if(method==='GET'){const q=await db.prepare('SELECT * FROM posts ORDER BY updated_at DESC LIMIT 200').all();return json({posts:q.results.map(p=>({id:p.id,slug:p.slug,title:p.title,excerpt:p.excerpt,body:p.body,cover:p.cover_url,tags:arr(p.tags_json),status:p.status,publishedAt:p.published_at}))});}
    if(method==='POST'){const p=normalizePost(await bodyJson(request));const id=crypto.randomUUID();await db.prepare('INSERT INTO posts(id,title,slug,excerpt,body,cover_url,tags_json,status,published_at) VALUES(?,?,?,?,?,?,?,?,?)').bind(id,p.title,p.slug,p.excerpt,p.body,p.cover_url,p.tags_json,p.status,p.status==='published'?new Date().toISOString():null).run();return json({ok:true,id},201);}

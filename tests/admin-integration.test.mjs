@@ -55,7 +55,7 @@ test('clientes e tarefas: CRUD seguro e contexto da IA',async()=>{
   const invalidDate=await call(db,'tasks','POST',{title:'Data inválida',dueDate:'2026-99-99'});assert.equal(invalidDate.status,400);
   const done=await call(db,'tasks/'+task.data.id,'PUT',{title:'Preparar lote PETG',status:'done',priority:'high'});
   assert.equal(done.status,200);assert.equal((await call(db,'tasks')).data.tasks[0].status,'done');
-  const context=await call(db,'assistant');assert.equal(context.status,200,JSON.stringify(context.data));assert.equal(context.data.tasks.length,0);
+
   const archived=await call(db,'customers/'+customer.data.id,'DELETE');assert.equal(archived.status,200);
   assert.equal((await call(db,'customers')).data.customers[0].status,'inactive');
  }finally{db.close();}

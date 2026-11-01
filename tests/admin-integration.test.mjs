@@ -46,7 +46,7 @@ test('fluxo administrativo completo: catálogo, orçamento, venda, estoque, rela
 test('clientes e tarefas: CRUD seguro e contexto da IA',async()=>{
  const db=memoryD1();try{
   const customer=await call(db,'customers','POST',{name:'Cliente de teste',phone:'61999990000',email:'cliente@example.com',notes:'Preferência PETG'});
-  assert.equal(customer.status,201);
+  assert.equal(customer.status,201,JSON.stringify(customer.data));
   const list=await call(db,'customers');assert.equal(list.data.customers.length,1);assert.equal(list.data.customers[0].name,'Cliente de teste');
   const badEmail=await call(db,'customers','POST',{name:'Inválido',email:'não-é-email'});assert.equal(badEmail.status,400);
   const task=await call(db,'tasks','POST',{title:'Preparar lote PETG',priority:'high',dueDate:'2026-11-15'});

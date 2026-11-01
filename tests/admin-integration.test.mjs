@@ -20,7 +20,7 @@ function memoryD1(){
   sql.exec('BEGIN');try{const out=[];for(const s of statements)out.push(await s.run());sql.exec('COMMIT');return out;}catch(e){sql.exec('ROLLBACK');throw e;}
  },close:()=>sql.close()};
 }
-function request(path,method='GET',body){const headers={'X-Local-Admin-Token':'test-local-token','X-Zynutz-Admin':'1'};if(body!==undefined)headers['Content-Type']='application/json';return new Request('http://localhost:8788/api/admin/'+path,{method,headers,body:body!==undefined?JSON.stringify(body):undefined});}
+function request(path,method='GET',body){const headers={'X-Local-Admin-Token':'test-local-token','X-Zynutz-Admin':'1'};if(method!=='GET')headers['Content-Type']='application/json';return new Request('http://localhost:8788/api/admin/'+path,{method,headers,body:body!==undefined?JSON.stringify(body):undefined});}
 const env=db=>({DB:db,LOCAL_DEV:'true',LOCAL_DEV_TOKEN:'test-local-token'});
 async function call(db,path,method='GET',body){const r=await admin({request:request(path,method,body),env:env(db)});return {status:r.status,data:await r.json()};}
 

@@ -9,6 +9,7 @@ function memoryD1(){
  sql.exec(readFileSync('migrations/0001_init.sql','utf8'));
  sql.exec(readFileSync('migrations/0002_sales_quotes.sql','utf8'));
  sql.exec(readFileSync('migrations/0003_security.sql','utf8'));
+ sql.exec(readFileSync('migrations/0004_customers_tasks.sql','utf8'));
  const wrap=(s,args=[])=>({
    bind:(...values)=>wrap(s,values),
    first:async()=>s.get(...args)||null,

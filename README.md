@@ -2,7 +2,7 @@
 
 Plataforma de loja 3D para sua Shopee: catálogo público, catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais, e uma calculadora que recebe um link do MakerWorld.
 
-**Status:** MVP implementado e testado em código. Falta configurar Cloudflare Pages, D1, R2, Cloudflare Access, inserir suas fotos reais e confirmar a licença dos modelos comerciais. A loja **não** cria pagamentos, não recebe pedidos diretamente e não sincroniza pedidos da Shopee automaticamente. O painel permite cadastrar as vendas reais manualmente e desconta o estoque com trilha de auditoria.
+**Status:** MVP implementado e testado em código. A branch `feat/commerce-assistant-foundation` inicia a evolução para gestão comercial, com cadastro de clientes, tarefas e contexto de leitura para o futuro assistente IA. Falta configurar Cloudflare Pages, D1, R2, Cloudflare Access, inserir suas fotos reais e confirmar a licença dos modelos comerciais. A loja **não** cria pagamentos, não recebe pedidos diretamente e não sincroniza pedidos da Shopee automaticamente. O painel permite cadastrar as vendas reais manualmente e desconta o estoque com trilha de auditoria.
 
 ## Segurança e direitos
 
@@ -55,7 +55,7 @@ O importador lê ID e título pelo link e tenta consultar os metadados de peso e
 - `functions/api/`: endpoints públicos e CRUD autenticado.
 - `functions/produto/[slug].js`, `functions/blog/[slug].js`: renderização HTML no servidor para SEO.
 - `server/`: motor de precificação compartilhado, autorização JWT e importação segura de links.
-- `migrations/`: tabelas de produtos, estoque, artigos, configurações, pedidos registrados e orçamentos.
+- `migrations/`: tabelas de produtos, estoque, artigos, configurações, pedidos registrados, orçamentos, clientes e tarefas.
 - `tests/`: validação do preço, lotes, links, autorização comercial e teste de integração SQL completo (D1 compatível com SQLite).
 
 ## Próximos checkpoints
@@ -64,7 +64,7 @@ O importador lê ID e título pelo link e tenta consultar os metadados de peso e
 - CP02: cadastrar produtos e fotografias reais da loja e validar o estoque inicial.
 - CP03: **Concluído em MVP:** registro manual de vendas, custo unitário congelado, baixa automática de estoque, receita, taxas, custos e contribuição, exportação CSV. **Pendente:** importação automática de relatórios antigos da Shopee, devoluções e conciliação bancária.
 - CP04: integração autenticada com a Shopee somente se houver API e permissões disponíveis; reconciliar pedidos idempotentes. O lançamento manual usa o nº do pedido + produto para bloquear duplicações.
-- CP05: posts programados em redes, cupons e campanhas; nunca fazer post sem conexão autorizada.
+- CP05: posts programados em redes, cupons e campanhas; nunca fazer post sem conexão autorizada.\n- CP06: conectar Ollama local ao assistente, com ferramentas permitidas e confirmação explícita antes de qualquer escrita.\n- CP07: expandir gestão de clientes, pedidos e tarefas; depois iniciar conectores oficiais da Shopee, Mercado Livre e avaliar OLX.
 
 ## Como usar o painel no dia a dia
 
@@ -75,7 +75,7 @@ O importador lê ID e título pelo link e tenta consultar os metadados de peso e
 5. Em **Vendas e lucro**, registre apenas pedidos confirmados. Para pedidos com vários produtos, crie uma linha por produto, repetindo o número do pedido. Informe receita *dessa linha*, taxas e frete distribuídos por linha; o custo de produção é congelado na transação, e o estoque é atualizado. Os lançamentos aparecem no painel e podem ser exportados em CSV.
 6. Em **Blog**, publique artigos originais, com uma foto própria de capa enviada ao R2. Em **Configurações**, cadastre links de redes sociais e WhatsApp; não há publicação automática nesses serviços.
 
-### Limites operacionais e próximos passos
+### Gestão comercial — CP01\n\nA migration `0004_customers_tasks.sql` adiciona cadastro de clientes (arquivamento lógico) e tarefas (prioridade, prazo e status), sem alterar os registros existentes de produtos, vendas, orçamentos ou estoque. O painel administrativo passa a exibir as áreas **Clientes**, **Tarefas** e **Assistente IA**. O contexto da IA é, nesta etapa, somente leitura e reúne produtos ativos, tarefas abertas e indicadores agregados de vendas. A conexão efetiva ao Ollama e a execução de ferramentas pela IA ainda serão implementadas em checkpoint posterior; nenhuma chamada a modelo é feita nesta versão.\n\nSe o D1 remoto já estiver em uso, faça backup antes e aplique a nova migration: `npx wrangler d1 migrations apply zynutz-3d-db --remote`. No ambiente local, use `--local`. Rode `npm test` e `npm run build` antes de publicar.\n\n### Limites operacionais e próximos passos
 
 - O site funciona em código e em testes com SQLite de memória. Para operar online ainda é necessário conectar **seus** D1/R2 e Cloudflare Access, aplicar as migrações, informar suas fotos e conferir permissões de comercialização. Não há checkout nem pagamentos no site: os botões de compra encaminham à Shopee.
 - A área de vendas é um controle gerencial de contribuição, **não** substitui o extrato da Shopee ou a contabilidade; pedidos devolvidos/cancelados devem ser conciliados antes de lançar como pedidos concluídos. A importação automática de relatórios, edição/estorno de pedidos e sincronização via API dependem de checkpoints futuros.
@@ -85,6 +85,6 @@ O importador lê ID e título pelo link e tenta consultar os metadados de peso e
 
 Consulte [SECURITY_REVIEW.md](SECURITY_REVIEW.md) para a auditoria de endpoints, JWT Cloudflare Access, formulários, uploads R2 e integridade do D1. Os testes automatizados incluem casos de CSRF, JWT adulterado, payload excessivo, concorrência, imagens inválidas e constraints da base.
 
-**Obrigatório antes da publicação:** aplicar `migrations/0003_security.sql` depois das anteriores, fazer backup do D1, restringir com Access `/admin/*` e `/api/admin/*` em produção e preview, manter `LOCAL_DEV` desligado, configurar limites de requisições no WAF e usar secrets no Pages. Todos os POST/PUT/DELETE do painel exigem `X-Zynutz-Admin: 1`, `Origin` coerente quando presente e tipos de conteúdo adequados.
+**Obrigatório antes da publicação:** aplicar `migrations/0003_security.sql` e `migrations/0004_customers_tasks.sql` depois das anteriores, fazer backup do D1, restringir com Access `/admin/*` e `/api/admin/*` em produção e preview, manter `LOCAL_DEV` desligado, configurar limites de requisições no WAF e usar secrets no Pages. Todos os POST/PUT/DELETE do painel exigem `X-Zynutz-Admin: 1`, `Origin` coerente quando presente e tipos de conteúdo adequados.
 
 O arquivo `_headers` só protege arquivos estáticos no Pages; as páginas HTML dinâmicas agora recebem CSP, X-Frame-Options e demais cabeçalhos diretamente da Function. **Mídias carregadas em R2 são acessíveis a quem possuir o link aleatório**, incluindo fotos de produtos ainda em rascunho; não envie dados pessoais ou fotografias confidenciais.

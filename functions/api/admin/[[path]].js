@@ -153,15 +153,21 @@ export async function onRequest(context){const auth=await requireAdmin(context);
    }
   }
   if(path[0]==='assistant'&&method==='GET'){
-   const [products,tasks,summary,last30,channels]=await Promise.all([
+   const [products,tasks,summary,last30,channels,customers,taskSummary,salesByProduct,recentSales]=await Promise.all([
     db.prepare("SELECT id,name,price_cents,stock,status FROM products WHERE status!='archived' ORDER BY updated_at DESC LIMIT 100").all(),
     db.prepare("SELECT id,title,status,priority,due_date FROM tasks WHERE status IN ('pending','in_progress') ORDER BY due_date LIMIT 100").all(),
     db.prepare('SELECT COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross,COALESCE(SUM(contribution_cents),0) contribution FROM sales').first(),
     db.prepare("SELECT COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross,COALESCE(SUM(contribution_cents),0) contribution FROM sales WHERE sold_at>=date('now','-30 days')").first(),
-    db.prepare("SELECT channel,COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross FROM sales GROUP BY channel ORDER BY gross DESC").all()
+    db.prepare("SELECT channel,COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross FROM sales GROUP BY channel ORDER BY gross DESC").all(),
+    db.prepare("SELECT status,COUNT(*) count FROM customers GROUP BY status").all(),
+    db.prepare("SELECT status,priority,COUNT(*) count FROM tasks GROUP BY status,priority").all(),
+    db.prepare("SELECT p.id productId,p.name productName,COUNT(*) orders,COALESCE(SUM(s.quantity),0) units,COALESCE(SUM(s.gross_cents),0) gross,COALESCE(SUM(s.contribution_cents),0) contribution FROM sales s JOIN products p ON p.id=s.product_id GROUP BY p.id,p.name ORDER BY gross DESC LIMIT 20").all(),
+    db.prepare("SELECT p.name productName,s.channel,s.quantity,s.gross_cents,s.contribution_cents,s.sold_at FROM sales s JOIN products p ON p.id=s.product_id ORDER BY s.sold_at DESC,s.created_at DESC LIMIT 20").all()
    ]);
    const productList=products.results.map(p=>({...p,price:p.price_cents/100}));
-   return json({products:productList,tasks:tasks.results,lowStock:productList.filter(p=>p.stock<=2),sales:{orders:summary.orders,gross:summary.gross/100,contribution:summary.contribution/100,last30Days:{orders:last30.orders,gross:last30.gross/100,contribution:last30.contribution/100},byChannel:channels.results.map(x=>({...x,gross:x.gross/100}))}});
+   const customerCounts={active:0,inactive:0,total:0};for(const row of customers.results){customerCounts[row.status]=row.count;customerCounts.total+=row.count;}
+   const taskCounts={pending:0,in_progress:0,done:0,cancelled:0,byPriority:{low:0,normal:0,high:0}};for(const row of taskSummary.results){taskCounts[row.status]=(taskCounts[row.status]||0)+row.count;if(row.status==='pending'||row.status==='in_progress')taskCounts.byPriority[row.priority]+=row.count;}
+   return json({products:productList,tasks:tasks.results,lowStock:productList.filter(p=>p.stock<=2),customers:customerCounts,tasksSummary:taskCounts,sales:{orders:summary.orders,gross:summary.gross/100,contribution:summary.contribution/100,last30Days:{orders:last30.orders,gross:last30.gross/100,contribution:last30.contribution/100},byChannel:channels.results.map(x=>({...x,gross:x.gross/100})),byProduct:salesByProduct.results.map(x=>({...x,gross:x.gross/100,contribution:x.contribution/100})),recent:recentSales.results.map(x=>({...x,gross:x.gross_cents/100,contribution:x.contribution_cents/100}))}});
   }
   if(path[0]==='blog'){
    if(method==='GET'){const q=await db.prepare('SELECT * FROM posts ORDER BY updated_at DESC LIMIT 200').all();return json({posts:q.results.map(p=>({id:p.id,slug:p.slug,title:p.title,excerpt:p.excerpt,body:p.body,cover:p.cover_url,tags:arr(p.tags_json),status:p.status,publishedAt:p.published_at}))});}

@@ -17,8 +17,8 @@ export async function lookupModel(link,fetchImpl=fetch){
    const payload=JSON.parse(raw);const m=payload?.data||payload;
    if(!m||typeof m!=='object')return result;
    const profile=Array.isArray(m.instances)?m.instances.find(p=>String(p.profileId||p.id)===base.profileId):null;
-   result.title=String(m.title||base.title).slice(0,140);const cover=m.coverUrl||m.cover||m.coverImage||m.designCoverUrl||m.designCover?.url||m.cover?.url||m.coverImageUrl||'';result.imageUrl=typeof cover==='string'&&/^https:\/\//.test(cover)?cover.slice(0,2000):'';result.designer=String(m.designCreator?.name||m.designCreator?.handle||'').slice(0,100);
-   result.license=String(m.license||'Não verificada');const coverCandidates=[m.coverUrl,m.coverImageUrl,m.designCoverUrl,m.cover?.url,m.cover?.imageUrl,m.coverImage?.url,m.cover,Array.isArray(m.images)?m.images[0]?.url:''];const cover=coverCandidates.find(x=>typeof x==='string'&&/^https:\/\//.test(x));result.imageUrl=cover?cover.slice(0,2000):'';
+   result.title=String(m.title||base.title).slice(0,140);result.designer=String(m.designCreator?.name||m.designCreator?.handle||'').slice(0,100);
+   result.license=String(m.license||'Não verificada');result.note='Confira gramas e tempo do perfil no Bambu Studio. Nenhum valor será inventado.';const coverCandidates=[m.coverUrl,m.coverImageUrl,m.designCoverUrl,m.cover?.url,m.cover?.imageUrl,m.coverImage?.url,m.cover,Array.isArray(m.images)?m.images[0]?.url:''];const cover=coverCandidates.find(x=>typeof x==='string'&&/^https:\/\//.test(x));result.imageUrl=cover?cover.slice(0,2000):'';
    // Não copiar imagens de terceiros para a loja sem autorização. Impressão: pesar e conferir no slicer.
    result.profileName=String(profile?.title||'').slice(0,140);
    const estimate=extractPrintEstimate(profile);

@@ -144,3 +144,10 @@ test('concorrência: edição e ajuste de estoque recusam escrita com saldo desa
   assert.equal(db.prepare('SELECT count(*) n FROM inventory_log').get().n,2);
  }finally{db.close()}
 });
+
+test('CSP: permite somente as origens locais do Ollama necessárias ao assistente',()=>{
+ const headers=readFileSync(new URL('../_headers',import.meta.url),'utf8');
+ const policy=headers.match(/Content-Security-Policy:\s*([^\n]+)/)?.[1]||'';
+ assert.match(policy,/connect-src 'self' http:\/\/127\.0\.0\.1:11434 http:\/\/localhost:11434/);
+ assert.doesNotMatch(policy,/connect-src[^\n]*https?:\/\/[^\s;]+/g,match=>/https?:\/\/(?!127\.0\.0\.1:11434|localhost:11434)/.test(match));
+});

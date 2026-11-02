@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 import {DatabaseSync} from 'node:sqlite';
 import {onRequest as admin} from '../functions/api/admin/[[path]].js';
 import {onRequestGet as publicProducts} from '../functions/api/products.js';
@@ -59,4 +60,10 @@ test('clientes e tarefas: CRUD seguro e contexto da IA',async()=>{
   const archived=await call(db,'customers/'+customer.data.id,'DELETE');assert.equal(archived.status,200);
   assert.equal((await call(db,'customers')).data.customers[0].status,'inactive');
  }finally{db.close();}
+});
+
+
+test('script do painel administrativo possui sintaxe JavaScript válida',()=>{
+ const result=spawnSync(process.execPath,['--check','assets/admin.js'],{encoding:'utf8'});
+ assert.equal(result.status,0, result.stderr||result.stdout||'Falha ao validar assets/admin.js');
 });

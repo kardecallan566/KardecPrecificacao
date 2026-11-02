@@ -32,7 +32,7 @@ test('fluxo administrativo completo: catálogo, orçamento, venda, estoque, rela
   let p=await call(db,'products','POST',{name:'Fantasma autoral com LED',status:'published',licenseStatus:'own_design',images:['https://example.org/foto-propria.jpg'],stock:3,grams:52,hours:2.5,price:39.9,packaging:1.2,extras:3,priceConfig:{filamentKg:80}});
   assert.equal(p.status,201);const id=p.data.id;
   let pub=await publicProducts({env:env(db),request:new Request('http://localhost/api/products')});const publicList=(await pub.json()).products;assert.equal(publicList.length,1);assert.equal(publicList[0].stock,3);assert.equal(publicList[0].images[0],'https://example.org/foto-propria.jpg');
-  assert.equal(db.prepare("SELECT value FROM settings WHERE key='brand'").get().value,'Kardlottgeek');
+  assert.equal((await db.prepare("SELECT value FROM settings WHERE key='brand'").first()).value,'Kardlottgeek');
   const quote=await call(db,'quotes','POST',{title:'Halloween',input:{grams:52,hours:2.5},costs:{marketplacePercent:20}});assert.equal(quote.status,201);
   assert.equal((await call(db,'quotes')).data.quotes.length,1);
   const first=await call(db,'sales','POST',{productId:id,channel:'shopee',externalOrder:'ORDER-123',quantity:2,gross:79.8,fee:17,shipping:5});assert.equal(first.status,201);assert.equal((await call(db,'products')).data.products[0].stock,1);
@@ -98,7 +98,8 @@ test('assistente: contexto inclui clientes, tarefas e desempenho de vendas por p
 
 test('vitrine pública: marca Kardlottgeek e disponibilidade por produto',async()=>{
  const db=memoryD1();try{
-  db.prepare("INSERT INTO products(id,slug,name,description,category,price_cents,stock,status,license_status) VALUES('p-public','sob-consulta','Peça sob encomenda','Descrição do produto','Decoração',4990,0,'published','own_design')").run();
+  await db.prepare("INSERT INTO products(id,slug,name,description,category,price_cents,stock,status,license_status) VALUES('p-public','sob-consulta','Peça sob encomenda','Descrição do produto','Decoração',4990,0,'published','own_design')").run();
+  assert.equal((await db.prepare("SELECT slug FROM products WHERE id='p-public'").first()).slug,'sob-consulta');
   db.prepare("UPDATE settings SET value='5561999990000' WHERE key='whatsapp'").run();
   const response=await publicProductPage({env:env(db),params:{slug:'sob-consulta'},request:new Request('https://loja.example/produto/sob-consulta')});
   const html=await response.text();

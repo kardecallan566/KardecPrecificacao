@@ -1,6 +1,6 @@
-# Zynutz 3D · Loja + Precificação MakerWorld
+# Kardlottgeek (KLG) · Loja + Precificação MakerWorld
 
-Plataforma de loja 3D para sua Shopee: catálogo público, catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais, e uma calculadora que recebe um link do MakerWorld.
+Plataforma da Kardlottgeek (KLG) para apresentar produtos de impressão 3D e encaminhar compras à Shopee: catálogo público, catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais, e uma calculadora que recebe um link do MakerWorld.
 
 **Status:** MVP de loja, precificação e gestão comercial em evolução diretamente na `main`. Já há cadastro de clientes e tarefas, contexto de negócio e chat com Ollama local. O assistente pode preparar uma tarefa e só a cria após confirmação explícita no painel. Falta configurar Cloudflare Pages, D1, R2, Cloudflare Access, inserir suas fotos reais e confirmar a licença dos modelos comerciais. A loja **não** cria pagamentos, não recebe pedidos diretamente e não sincroniza pedidos da Shopee automaticamente. O painel permite cadastrar as vendas reais manualmente e desconta o estoque com trilha de auditoria.
 
@@ -21,10 +21,10 @@ npm run build
 
 1. Conecte `kardecallan566/KardecPrecificacao` via integração Git (não use Direct Upload para Pages Functions). Configure `npm run build` como comando e `dist` como diretório.
 2. Crie o D1 `zynutz-3d-db` e o bucket R2 `zynutz-3d-media`. No painel Pages > Settings > Bindings, associe `DB` (D1) e `MEDIA` (R2). O exemplo `wrangler.toml.example` contém a estrutura caso prefira Wrangler. Não salve o ID real diretamente em arquivo público se não quiser expô-lo.
-3. Instale Wrangler localmente (`npm install`) e execute `npx wrangler d1 migrations apply zynutz-3d-db --remote` usando sua configuração `wrangler.toml` já preenchida. **Aplique ambas as migrations 0001 e 0002**, para criar estoque, histórico de orçamentos e vendas. Para criar o banco local, use `--local`.
+3. Instale Wrangler localmente (`npm install`) e execute `npx wrangler d1 migrations apply zynutz-3d-db --remote` usando sua configuração `wrangler.toml` já preenchida. **Aplique ambas as migrations 0001 a 0005**, para criar estoque, histórico de orçamentos e vendas. Para criar o banco local, use `--local`.
 4. Crie um aplicativo **Cloudflare Access** (self-hosted) com política restrita ao seu e-mail para `/admin/*` e `/api/admin/*`; proteja a prévia também. No Pages > Variables and Secrets, configure `CF_ACCESS_TEAM_DOMAIN` (ex.: `minha-equipe.cloudflareaccess.com`), `CF_ACCESS_AUD` (AUD do app Access) e `ADMIN_EMAIL`.
 5. Publique; depois acesse `/admin/` para configurar a marca, redes sociais, custos e cadastrar produtos. Imagens e vídeos são armazenados no R2 privado e disponibilizados por `/media/` somente via chave aleatória. Vídeos limitados a 20 MB nesta versão.
-6. Verifique a autorização comercial, o custo da vela LED, o consumo real no Bambu Studio, fotografias próprias e o link específico da Shopee antes de publicar o fantasma de Halloween.
+6. Verifique a autorização comercial, o custo da vela LED, o consumo real no Bambu Studio, fotografias próprias e o link específico da Shopee antes de publicar o produto em destaque.
 
 ### Desenvolvimento local
 
@@ -50,7 +50,7 @@ O importador lê ID e título pelo link e tenta consultar os metadados de peso e
 
 ## Estrutura
 
-- `index.html`, `assets/`: vitrine responsiva sazonal e cliente JS sem dependências de build.
+- `index.html`, `assets/`: vitrine responsiva da Kardlottgeek e cliente JS sem dependências de build.
 - `admin/`: cadastro, edição, publicação e arquivamento de produtos; estoque, mídia, blog, redes, histórico de orçamentos e painel de vendas.
 - `functions/api/`: endpoints públicos e CRUD autenticado.
 - `functions/produto/[slug].js`, `functions/blog/[slug].js`: renderização HTML no servidor para SEO.

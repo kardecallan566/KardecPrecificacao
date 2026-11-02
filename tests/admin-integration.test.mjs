@@ -4,6 +4,7 @@ import {spawnSync} from 'node:child_process';
 import {DatabaseSync} from 'node:sqlite';
 import {onRequest as admin} from '../functions/api/admin/[[path]].js';
 import {onRequestGet as publicProducts} from '../functions/api/products.js';
+import {onRequestGet as publicProductPage} from '../functions/produto/[slug].js';
 
 function memoryD1(){
  const sql=new DatabaseSync(':memory:');
@@ -11,6 +12,7 @@ function memoryD1(){
  sql.exec(readFileSync('migrations/0002_sales_quotes.sql','utf8'));
  sql.exec(readFileSync('migrations/0003_security.sql','utf8'));
  sql.exec(readFileSync('migrations/0004_customers_tasks.sql','utf8'));
+ sql.exec(readFileSync('migrations/0005_kardlottgeek_brand.sql','utf8'));
  const wrap=(s,args=[])=>({
    bind:(...values)=>wrap(s,values),
    first:async()=>s.get(...args)||null,
@@ -29,7 +31,8 @@ test('fluxo administrativo completo: catálogo, orçamento, venda, estoque, rela
  const db=memoryD1();try{
   let p=await call(db,'products','POST',{name:'Fantasma autoral com LED',status:'published',licenseStatus:'own_design',images:['https://example.org/foto-propria.jpg'],stock:3,grams:52,hours:2.5,price:39.9,packaging:1.2,extras:3,priceConfig:{filamentKg:80}});
   assert.equal(p.status,201);const id=p.data.id;
-  let pub=await publicProducts({env:env(db),request:new Request('http://localhost/api/products')});assert.equal((await pub.json()).products.length,1);
+  let pub=await publicProducts({env:env(db),request:new Request('http://localhost/api/products')});const publicList=(await pub.json()).products;assert.equal(publicList.length,1);assert.equal(publicList[0].stock,3);assert.equal(publicList[0].images[0],'https://example.org/foto-propria.jpg');
+  assert.equal(db.prepare("SELECT value FROM settings WHERE key='brand'").get().value,'Kardlottgeek');
   const quote=await call(db,'quotes','POST',{title:'Halloween',input:{grams:52,hours:2.5},costs:{marketplacePercent:20}});assert.equal(quote.status,201);
   assert.equal((await call(db,'quotes')).data.quotes.length,1);
   const first=await call(db,'sales','POST',{productId:id,channel:'shopee',externalOrder:'ORDER-123',quantity:2,gross:79.8,fee:17,shipping:5});assert.equal(first.status,201);assert.equal((await call(db,'products')).data.products[0].stock,1);
@@ -91,3 +94,22 @@ test('assistente: contexto inclui clientes, tarefas e desempenho de vendas por p
  }finally{db.close();}
 });
 
+
+
+test('vitrine pública: marca Kardlottgeek e disponibilidade por produto',async()=>{
+ const db=memoryD1();try{
+  db.prepare("INSERT INTO products(id,slug,name,description,category,price_cents,stock,status,license_status) VALUES('p-public','sob-consulta','Peça sob encomenda','Descrição do produto','Decoração',4990,0,'published','own_design')").run();
+  db.prepare("UPDATE settings SET value='5561999990000' WHERE key='whatsapp'").run();
+  const response=await publicProductPage({env:env(db),params:{slug:'sob-consulta'},request:new Request('https://loja.example/produto/sob-consulta')});
+  const html=await response.text();
+  assert.equal(response.status,200);
+  assert.match(html,/<title>Peça sob encomenda · Kardlottgeek<\/title>/);
+  assert.match(html,/Consulte disponibilidade e prazo de produção/);
+  assert.match(html,/Consultar pelo WhatsApp/);
+ }finally{db.close();}
+});
+
+test('script público da vitrine possui sintaxe JavaScript válida',()=>{
+ const result=spawnSync(process.execPath,['--check','assets/store.js'],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr||result.stdout||'Falha ao validar assets/store.js');
+});

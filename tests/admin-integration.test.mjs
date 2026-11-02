@@ -98,7 +98,7 @@ test('assistente: contexto inclui clientes, tarefas e desempenho de vendas por p
 
 test('vitrine pública: marca Kardlottgeek e disponibilidade por produto',async()=>{
  const db=memoryD1();try{
-  await db.prepare("INSERT INTO products(id,slug,name,description,category,price_cents,stock,status,license_status) VALUES('p-public','sob-consulta','Peça sob encomenda','Descrição do produto','Decoração',4990,0,'published','own_design')").run();
+  await db.prepare("INSERT INTO products(id,slug,name,description,category,price_cents,stock,status,license_status,images_json) VALUES('p-public','sob-consulta','Peça sob encomenda','Descrição do produto','Decoração',4990,0,'published','own_design','[\"https://example.org/peca.jpg\"]')").run();
   assert.equal((await db.prepare("SELECT slug FROM products WHERE id='p-public'").first()).slug,'sob-consulta');
   db.prepare("UPDATE settings SET value='5561999990000' WHERE key='whatsapp'").run();
   const response=await publicProductPage({env:env(db),params:{slug:'sob-consulta'},request:new Request('https://loja.example/produto/sob-consulta')});

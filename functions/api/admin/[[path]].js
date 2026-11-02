@@ -153,12 +153,15 @@ export async function onRequest(context){const auth=await requireAdmin(context);
    }
   }
   if(path[0]==='assistant'&&method==='GET'){
-   const [products,tasks,summary]=await Promise.all([
+   const [products,tasks,summary,last30,channels]=await Promise.all([
     db.prepare("SELECT id,name,price_cents,stock,status FROM products WHERE status!='archived' ORDER BY updated_at DESC LIMIT 100").all(),
     db.prepare("SELECT id,title,status,priority,due_date FROM tasks WHERE status IN ('pending','in_progress') ORDER BY due_date LIMIT 100").all(),
-    db.prepare('SELECT COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross,COALESCE(SUM(contribution_cents),0) contribution FROM sales').first()
+    db.prepare('SELECT COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross,COALESCE(SUM(contribution_cents),0) contribution FROM sales').first(),
+    db.prepare("SELECT COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross,COALESCE(SUM(contribution_cents),0) contribution FROM sales WHERE sold_at>=date('now','-30 days')").first(),
+    db.prepare("SELECT channel,COUNT(*) orders,COALESCE(SUM(gross_cents),0) gross FROM sales GROUP BY channel ORDER BY gross DESC").all()
    ]);
-   return json({products:products.results.map(p=>({...p,price:p.price_cents/100})),tasks:tasks.results, sales:{orders:summary.orders,gross:summary.gross/100,contribution:summary.contribution/100}});
+   const productList=products.results.map(p=>({...p,price:p.price_cents/100}));
+   return json({products:productList,tasks:tasks.results,lowStock:productList.filter(p=>p.stock<=2),sales:{orders:summary.orders,gross:summary.gross/100,contribution:summary.contribution/100,last30Days:{orders:last30.orders,gross:last30.gross/100,contribution:last30.contribution/100},byChannel:channels.results.map(x=>({...x,gross:x.gross/100}))}});
   }
   if(path[0]==='blog'){
    if(method==='GET'){const q=await db.prepare('SELECT * FROM posts ORDER BY updated_at DESC LIMIT 200').all();return json({posts:q.results.map(p=>({id:p.id,slug:p.slug,title:p.title,excerpt:p.excerpt,body:p.body,cover:p.cover_url,tags:arr(p.tags_json),status:p.status,publishedAt:p.published_at}))});}

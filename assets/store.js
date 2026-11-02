@@ -23,7 +23,7 @@ async function init(){
   document.title=`${s.brand||'Kardlottgeek'} · Impressão 3D`;
   for(const id of ['navShopee','heroShopee','featureShopee','ctaShopee']){const el=document.getElementById(id);if(el&&s.shopee_url&&safeUrl(s.shopee_url)!=='#')el.href=safeUrl(s.shopee_url);}
   const socials=['instagram','tiktok','youtube'].filter(x=>s[x]);if(s.whatsapp)socials.push('whatsapp');
-  $('#socialLinks').innerHTML=socials.map(k=>`<a rel="noopener noreferrer" target="_blank" href="${escape(k==='whatsapp'?`https://wa.me/${String(s.whatsapp).replace(/\\D/g,'')}`:safeUrl(s[k]))}">${escape(k.toUpperCase())} ↗</a>`).join('');
+  $('#socialLinks').innerHTML=socials.map(k=>`<a rel="noopener noreferrer" target="_blank" href="${escape(k==='whatsapp'?`https://wa.me/${String(s.whatsapp).replace(/\D/g,'')}`:safeUrl(s[k]))}">${escape(k.toUpperCase())} ↗</a>`).join('');
  }catch{}
  try{const r=await fetchJson('/api/products');state.products=r.products||[];render();}
  catch{$('#catalogGrid').innerHTML='<div class="empty-state">Catálogo em configuração. Volte em breve para conhecer nossos produtos.</div>';}

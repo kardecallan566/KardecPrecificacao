@@ -45,7 +45,7 @@ export async function mountModelViewer(root,file){
   const mesh=ext==='stl'?parseSTL(buffer):ext==='obj'?parseOBJ(new TextDecoder().decode(buffer)):ext==='3mf'?await parse3MF(buffer):null;
   if(!mesh)throw Error('Formato não suportado. Use STL, OBJ ou 3MF.');
   if(!mesh.vertices.length||!mesh.faces.length)throw Error('Não encontrei triângulos no arquivo.');
-  const min=[0,1,2].map(k=>Math.min(...mesh.vertices.map(v=>v[k]))),max=[0,1,2].map(k=>Math.max(...mesh.vertices.map(v=>v[k])));
+  const bounds=mesh.vertices.reduce((b,v)=>{for(let k=0;k<3;k++){b.min[k]=Math.min(b.min[k],v[k]);b.max[k]=Math.max(b.max[k],v[k])}return b},{min:[Infinity,Infinity,Infinity],max:[-Infinity,-Infinity,-Infinity]});const min=bounds.min,max=bounds.max;
   const center=min.map((v,k)=>(v+max[k])/2),span=Math.max(...max.map((v,k)=>v-min[k]))||1;
   const verts=mesh.vertices.map(v=>v.map((n,k)=>(n-center[k])/span));
   const faces=mesh.faces.filter(f=>f.every(i=>verts[i]));
@@ -56,7 +56,7 @@ export async function mountModelViewer(root,file){
    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle='#f4f2ec';ctx.fillRect(0,0,w,h);
    const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),scale=Math.min(w,h)*.72*zoom;
    const projected=verts.map(v=>{const x=v[0]*cy-v[2]*sy,z=v[0]*sy+v[2]*cy,y=v[1]*cp-z*sp,zz=v[1]*sp+z*cp;return [w/2+x*scale,h/2-y*scale,zz]});
-   const sorted=faces.map(f=>{const a=projected[f[0]],b=projected[f[1]],c=projected[f[2]],z=(a[2]+b[2]+c[2])/3;const ux=b[0]-a[0],uy=b[1]-a[1],vx=c[0]-a[0],vy=c[1]-a[1],area=ux*vy-uy*vx;if(area>=0)return null;const ab=verts[f[1]].map((n,k)=>n-verts[f[0]][k]),ac=verts[f[2]].map((n,k)=>n-verts[f[0]][k]),normal=[ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0]],len=Math.hypot(...normal)||1,light=clamp(.48+.52*Math.abs((normal[0]*.35+normal[1]*.8+normal[2]*.45)/len),.35,1);return {a,b,c,z,light}}).filter(Boolean).sort((a,b)=>b.z-a.z);
+   const sorted=faces.map(f=>{const a=projected[f[0]],b=projected[f[1]],c=projected[f[2]],z=(a[2]+b[2]+c[2])/3;const ux=b[0]-a[0],uy=b[1]-a[1],vx=c[0]-a[0],vy=c[1]-a[1],area=ux*vy-uy*vx;const ab=verts[f[1]].map((n,k)=>n-verts[f[0]][k]),ac=verts[f[2]].map((n,k)=>n-verts[f[0]][k]),normal=[ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0]],len=Math.hypot(...normal)||1,light=clamp(.48+.52*Math.abs((normal[0]*.35+normal[1]*.8+normal[2]*.45)/len),.35,1);return {a,b,c,z,light}}).filter(Boolean).sort((a,b)=>b.z-a.z);
    for(const f of sorted){ctx.beginPath();ctx.moveTo(f.a[0],f.a[1]);ctx.lineTo(f.b[0],f.b[1]);ctx.lineTo(f.c[0],f.c[1]);ctx.closePath();const shade=Math.round(112+f.light*105);ctx.fillStyle='rgb('+shade+','+Math.round(shade*.72)+','+Math.round(shade*.53)+')';ctx.fill();ctx.strokeStyle='rgba(75,65,55,.18)';ctx.lineWidth=.45;ctx.stroke()}
    ctx.strokeStyle='#d4d0c6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(w*.12,h*.82);ctx.lineTo(w*.88,h*.82);ctx.stroke();
    if(auto&&!drag){if(!last)last=t;yaw+=(t-last)*.00022;last=t}raf=requestAnimationFrame(draw);

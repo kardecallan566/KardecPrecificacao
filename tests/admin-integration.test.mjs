@@ -67,3 +67,27 @@ test('script do painel administrativo possui sintaxe JavaScript válida',()=>{
  const result=spawnSync(process.execPath,['--check','assets/admin.js'],{encoding:'utf8'});
  assert.equal(result.status,0, result.stderr||result.stdout||'Falha ao validar assets/admin.js');
 });
+
+test('assistente: contexto inclui clientes, tarefas e desempenho de vendas por produto',async()=>{
+ const db=memoryD1();try{
+  const product=await call(db,'products','POST',{name:'Suporte PETG',status:'draft',stock:5,grams:80,hours:2,price:20});
+  assert.equal(product.status,201);
+  const sale=await call(db,'sales','POST',{productId:product.data.id,channel:'whatsapp',quantity:2,gross:40,fee:0,shipping:0,other:0,soldAt:'2026-11-01'});
+  assert.equal(sale.status,201,JSON.stringify(sale.data));
+  const customer=await call(db,'customers','POST',{name:'Cliente privado',phone:'61999990000'});
+  assert.equal(customer.status,201);
+  const task=await call(db,'tasks','POST',{title:'Embalar pedidos',priority:'high'});
+  assert.equal(task.status,201);
+  const response=await call(db,'assistant');
+  assert.equal(response.status,200);
+  assert.deepEqual(response.data.customers,{active:1,inactive:0,total:1});
+  assert.equal(response.data.tasksSummary.pending,1);
+  assert.equal(response.data.tasksSummary.byPriority.high,1);
+  assert.equal(response.data.sales.orders,1);
+  assert.equal(response.data.sales.byProduct[0].productName,'Suporte PETG');
+  assert.equal(response.data.sales.byProduct[0].units,2);
+  assert.equal(response.data.sales.recent[0].channel,'whatsapp');
+  assert.equal(JSON.stringify(response.data).includes('Cliente privado'),false,'o contexto não deve expor dados pessoais dos clientes');
+ }finally{db.close();}
+});
+

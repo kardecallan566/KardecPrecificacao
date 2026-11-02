@@ -9,7 +9,7 @@ export function extractPrintEstimate(instance){
  return {grams,hours:seconds?Number((seconds/3600).toFixed(3)):null};
 }
 export async function lookupModel(link,fetchImpl=fetch){
- const base=parseMakerworldUrl(link);const result={...base,designer:'',license:'Não verificada',licenseStatus:'pending',grams:null,hours:null,imageUrl:'',note:'Confira licença, gramas e tempo no Bambu Studio. Nenhum valor será inventado.'};
+ const base=parseMakerworldUrl(link);const result={...base,modelPreviewUrl:`https://makerworld.com/en/models/${base.modelId}`,designer:'',license:'Não verificada',licenseStatus:'pending',grams:null,hours:null,imageUrl:'',note:'Confira licença, gramas e tempo no Bambu Studio. Nenhum valor será inventado.'};
  try{
    const res=await fetchImpl(`https://api.bambulab.com/v1/design-service/design/${base.modelId}`,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(6500)});
    if(!res.ok)return result;
@@ -17,7 +17,7 @@ export async function lookupModel(link,fetchImpl=fetch){
    const payload=JSON.parse(raw);const m=payload?.data||payload;
    if(!m||typeof m!=='object')return result;
    const profile=Array.isArray(m.instances)?m.instances.find(p=>String(p.profileId||p.id)===base.profileId):null;
-   result.title=String(m.title||base.title).slice(0,140);result.designer=String(m.designCreator?.name||m.designCreator?.handle||'').slice(0,100);
+   result.title=String(m.title||base.title).slice(0,140);const cover=m.coverUrl||m.cover||m.coverImage||m.designCoverUrl||m.designCover?.url||m.cover?.url||m.coverImageUrl||'';result.imageUrl=typeof cover==='string'&&/^https:\/\//.test(cover)?cover.slice(0,2000):'';result.designer=String(m.designCreator?.name||m.designCreator?.handle||'').slice(0,100);
    result.license=String(m.license||'Não verificada');result.note=interpretLicense(m.license).note;
    // Não copiar imagens de terceiros para a loja sem autorização. Impressão: pesar e conferir no slicer.
    result.profileName=String(profile?.title||'').slice(0,140);

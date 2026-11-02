@@ -26,6 +26,6 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE INDEX IF NOT EXISTS idx_posts_visible ON posts(status,published_at);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 INSERT OR IGNORE INTO settings(key,value) VALUES
- ('brand','Zynutz 3D'),('tagline','Ideias reais, impressas em 3D.'),
+ ('brand','Kardlottgeek'),('tagline','Ideias criativas, feitas em 3D.'),
  ('shopee_url','https://shopee.com.br/zynutznews'),('whatsapp',''),('instagram',''),('tiktok',''),('youtube',''),
  ('default_costs','{"filamentKg":80,"energyKwh":1.1,"printerWatts":120,"packaging":1.2,"machineHourly":1.5,"laborHourly":20,"laborMinutes":10,"wastePercent":5,"failurePercent":5,"marketplacePercent":20,"marketplaceFixed":4.5,"taxPercent":0,"targetMarginPercent":25,"adsPerSale":0,"extras":0}');

@@ -5,3 +5,35 @@ body.blog-body{--blog-ink:#24242a;--blog-muted:#77777e;background:#f5f1e9;color:
 .blog-body .foot{background:#25252a;color:#f5f1e9}.blog-article{max-width:780px;margin:60px auto 100px;font-family:Georgia,serif}.blog-article>a{font:800 10px Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#a65b42}.blog-article .eyebrow{font:800 9px Arial,sans-serif;color:#a65b42;letter-spacing:.2em;margin-top:45px}.blog-article h1{font-size:clamp(42px,6vw,72px);line-height:1;letter-spacing:-.06em;font-weight:400}.blog-article .muted{font:10px Arial,sans-serif;color:#89847c}.blog-cover{width:100%;max-height:520px;object-fit:cover;margin:24px 0}.blog-article p:not(.eyebrow):not(.muted){font-size:18px;line-height:2;color:#4e4c49}.blog-article p:first-of-type:not(.eyebrow){font-size:20px}
 @media(max-width:720px){.blog-shell{padding:35px 6vw 70px}.blog-masthead{grid-template-columns:1fr;padding:35px 0}.blog-masthead>p{margin:0}.blog-featured{grid-template-columns:1fr}.blog-featured-art{min-height:230px}.blog-index-grid{grid-template-columns:1fr 1fr;gap:18px}.editorial-image{height:160px}.editorial-card h3{font-size:20px}.blog-article{margin:35px 0 70px}}
 @media(max-width:460px){.blog-index-grid{grid-template-columns:1fr}.editorial-image{height:220px}.blog-list-heading h2{font-size:27px}}
+
+/* Identidade editorial KLG: revista de laboratório criativo */
+.blog-body{background:#f2eee5;background-image:radial-gradient(#c9bfae55 .7px,transparent .7px);background-size:17px 17px}
+.blog-body .promo{background:#b9e64c;color:#24351a;font-family:Arial,sans-serif;letter-spacing:.17em}
+.blog-body .top{background:#f8f5edcc;backdrop-filter:blur(12px)}
+.blog-body .logo span{color:#7aaf26}
+.blog-shell{position:relative}
+.blog-masthead{border-bottom:2px solid #292c27;position:relative}
+.blog-masthead h1{font-weight:700;font-family:Arial,sans-serif;letter-spacing:-.09em;color:#292c27}
+.blog-masthead h1 em{font-family:Georgia,serif;font-style:italic;color:#78a927}
+.blog-masthead>p{font-family:Arial,sans-serif;border-left:3px solid #b8e64b;padding-left:18px}
+.blog-kicker{color:#648b25}
+.blog-mascot-note{display:flex;align-items:center;gap:12px;margin-top:22px;font:800 11px Arial,sans-serif;color:#526b2d}
+.blog-mascot-note img{width:76px;height:76px;object-fit:contain;background:#dff0bd;border-radius:50%;padding:5px}
+.blog-featured{background:#dce9c6;border:1px solid #c2d49e;border-radius:4px;overflow:hidden;position:relative}
+.blog-featured-art{background:radial-gradient(circle at 50% 45%,#f4f6dd,#c7df9a 72%);position:relative}
+.featured-mascot{width:min(82%,340px);height:320px;object-fit:contain;filter:drop-shadow(0 16px 9px #48651d22)}
+.blog-featured-copy h2{font-weight:700;color:#2b3424}
+.blog-featured-copy a,.editorial-card>a{color:#648b25}
+.blog-list-heading{border-color:#292c27}
+.blog-list-heading h2{font-family:Arial,sans-serif;font-weight:800;letter-spacing:-.06em}
+.editorial-card{background:#faf8f1;border:1px solid #ded8ca;border-radius:5px;padding:10px;transition:transform .2s,box-shadow .2s}
+.editorial-card:hover{transform:translateY(-5px);box-shadow:0 15px 30px #2b342411}
+.editorial-image{border-radius:3px;background:linear-gradient(145deg,#e2edc9,#d2e1b2)}
+.editorial-card h3{font-weight:700;letter-spacing:-.035em}
+.editorial-card p{font-family:Arial,sans-serif}
+.blog-article{background:#faf8f1;padding:clamp(22px,5vw,60px);border:1px solid #ded8ca;border-radius:5px}
+.blog-article h1{font-weight:700}
+.blog-article .eyebrow{color:#648b25}
+.blog-article>a{color:#648b25}
+.blog-body .foot{border-top:5px solid #b8e64b}
+@media(max-width:720px){.blog-mascot-note img{width:58px;height:58px}.featured-mascot{height:230px}}

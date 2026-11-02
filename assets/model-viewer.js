@@ -33,8 +33,13 @@ async function parse3MF(buffer){
   p+=46+nameLen+extra+comment;
  }
  if(!xml)throw Error('Não encontrei a malha 3D dentro do 3MF.');
- const vertices=[...xml.matchAll(/<vertex\s+[^>]*x="([^"]+)"[^>]*y="([^"]+)"[^>]*z="([^"]+)"[^>]*\/>/g)].map(m=>[+m[1],+m[2],+m[3]]);
- const faces=[...xml.matchAll(/<triangle\s+[^>]*v1="(\d+)"[^>]*v2="(\d+)"[^>]*v3="(\d+)"[^>]*\/>/g)].map(m=>[+m[1],+m[2],+m[3]]);
+ const vertices=[],faces=[];
+ for(const object of xml.matchAll(/<object\b[^>]*>([\s\S]*?)<\/object>/g)){
+  const body=object[1],offset=vertices.length;
+  const localVertices=[...body.matchAll(/<vertex\s+[^>]*x="([^"]+)"[^>]*y="([^"]+)"[^>]*z="([^"]+)"[^>]*\/>/g)].map(m=>[+m[1],+m[2],+m[3]]);
+  const localFaces=[...body.matchAll(/<triangle\s+[^>]*v1="(\d+)"[^>]*v2="(\d+)"[^>]*v3="(\d+)"[^>]*\/>/g)].map(m=>[+m[1]+offset,+m[2]+offset,+m[3]+offset]);
+  vertices.push(...localVertices);faces.push(...localFaces);
+ }
  if(!vertices.length||!faces.length)throw Error('A malha deste 3MF não pôde ser interpretada.');
  return {vertices,faces};
 }

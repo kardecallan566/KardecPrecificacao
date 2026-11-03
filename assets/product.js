@@ -1,0 +1,1 @@
+document.addEventListener('click',e=>{const b=e.target.closest('[data-photo]');if(!b)return;const gallery=b.closest('.detail-gallery'),main=gallery?.querySelector('.detail-image img');if(!main)return;const img=b.querySelector('img');if(img){main.src=img.src;main.alt=img.alt;}gallery.querySelectorAll('[data-photo]').forEach(x=>x.classList.toggle('active',x===b));});

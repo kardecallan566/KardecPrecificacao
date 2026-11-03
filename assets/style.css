@@ -211,3 +211,47 @@ html[data-design="space"] .mascot-orbit img{filter:drop-shadow(0 0 22px #a99aff6
 .hero-showroom .hero-copy:before{border-color:#ffffff0b;box-shadow:0 0 0 45px #ffffff03,0 0 0 90px #ffffff02}
 @media(max-width:1000px){.hero-showroom .hero-inner{grid-template-columns:1fr}.hero-showroom .hero-copy{padding:65px 7vw 42px}.showroom-stage{min-height:520px}.mascot-orbit{width:115px;right:3%;top:2%}}
 @media(max-width:700px){.showroom-stage{min-height:420px}.mascot-orbit{width:90px;right:2%;top:2%}.mascot-orbit span{display:none}.hero-showroom h1{font-size:clamp(40px,10vw,60px)}.hero-showroom .hero-copy{padding-top:55px}}
+
+/* KLG commerce redesign — product-first, warm and inviting */
+.hero-commerce{background:#f7f3eb;color:#242b28;border-bottom:1px solid #e8e1d5}
+.hero-commerce .hero-inner{min-height:590px;grid-template-columns:1fr 1fr;max-width:1500px}
+.hero-commerce .hero-copy{padding:92px 5vw 58px 8vw}
+.hero-commerce .eyebrow{color:#77952c}
+.hero-commerce .dot{background:#b5db54;box-shadow:0 0 0 4px #b5db5428}
+.hero-commerce h1{font-size:clamp(44px,5.2vw,76px);line-height:1.02;color:#252b27;white-space:normal;letter-spacing:-.075em}
+.hero-commerce h1 em{color:#ed765e}
+.hero-commerce .hero-description{color:#70766c;max-width:440px}
+.hero-commerce .button.primary{background:#ed765e;color:#fff;border-radius:100px}
+.hero-commerce .button.primary:hover{background:#dc634b}
+.hero-commerce .button.secondary{color:#374137;border-color:#d7d9cd;border-radius:100px}
+.hero-assurance{display:flex;gap:18px;flex-wrap:wrap;margin-top:32px;color:#7d8476;font:700 10px Arial,sans-serif}
+.commerce-hero-art{position:relative;overflow:hidden;min-height:530px;margin:28px 28px 28px 0;border-radius:20px;background:linear-gradient(145deg,#dce9c5,#b7d58b 48%,#8eae68);display:flex;flex-direction:column;justify-content:space-between;padding:25px 30px;color:#34442b}
+.commerce-art-top,.commerce-art-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;font:800 9px Arial,sans-serif;letter-spacing:.14em;position:relative;z-index:2}
+.commerce-art-bottom{align-items:end;flex-direction:column;text-align:right}
+.commerce-art-bottom b{font:800 clamp(20px,2.6vw,34px)/1 Arial,sans-serif;letter-spacing:-.06em}
+.commerce-art-bottom span{font-size:8px;color:#61784b}
+.commerce-art-glow{position:absolute;width:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#f8f5d7 0,#e4edc8 35%,#c5dda0 68%,transparent 70%);left:10%;top:10%}
+.commerce-art-shapes{position:absolute;inset:18% 5% 18%;display:flex;align-items:center;justify-content:center;gap:3%;transform:rotate(-8deg)}
+.art-shape{display:grid;place-items:center;box-shadow:0 22px 28px #455e2b25;border:1px solid #ffffff8c}
+.art-one{width:24%;aspect-ratio:.78;border-radius:48% 48% 24% 24%;background:linear-gradient(145deg,#ffb8a1,#f27d68);font-size:clamp(30px,5vw,70px);color:#fff7}
+.art-two{width:30%;aspect-ratio:1;border-radius:35%;background:linear-gradient(145deg,#fff8e8,#e5d4b6);font-size:clamp(40px,7vw,90px);color:#a6c85d}
+.art-three{width:22%;aspect-ratio:.8;border-radius:45% 45% 25% 25%;background:linear-gradient(145deg,#b6e8d7,#5cbda6);font-size:clamp(30px,5vw,65px);color:#fff8}
+.commerce-mascot{position:absolute;right:5%;bottom:16%;width:clamp(100px,17vw,190px);z-index:3;display:flex;flex-direction:column;align-items:center;transform:rotate(5deg)}
+.commerce-mascot img{width:100%;filter:drop-shadow(0 14px 12px #405d2d35)}
+.commerce-mascot span{font:800 8px Arial,sans-serif;letter-spacing:.08em;background:#29362a;color:#e2f3bd;border-radius:30px;padding:7px 11px;margin-top:-10px}
+.hero-commerce .hero-bottom{display:none}
+.collection-card{transition:transform .2s,box-shadow .2s}
+.collection-card:hover{transform:translateY(-5px);box-shadow:0 18px 32px #24302412}
+.product-card{border:1px solid #e9e5dc;border-radius:13px;box-shadow:0 4px 15px #292a2010}
+.product-photo{background:radial-gradient(circle at 50% 35%,#fff,#f1eee5 78%);overflow:hidden}
+.product-photo img{transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.product-card:hover .product-photo img{transform:scale(1.045)}
+.product-body{padding:20px 20px 22px}
+.product-body h3{font-size:15px;letter-spacing:-.025em}
+.product-price b{font-size:22px;color:#2e382b}
+.product-detail-link{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid #eee9df;font-size:11px;font-weight:800;color:#718a39}
+.product-detail-link span{font-size:17px}
+.availability-pill{border-radius:100px;backdrop-filter:blur(8px)}
+.availability-pill.ready{background:#e6f5d9;color:#436c22}
+.availability-pill.consult{background:#fff2df;color:#96602e}
+@media(max-width:740px){.hero-commerce .hero-inner{grid-template-columns:1fr}.hero-commerce .hero-copy{padding:60px 7vw 35px}.commerce-hero-art{min-height:370px;margin:0 5vw 28px}.commerce-art-bottom b{font-size:23px}.commerce-mascot{width:125px;bottom:15%}}

@@ -255,3 +255,7 @@ html[data-design="space"] .mascot-orbit img{filter:drop-shadow(0 0 22px #a99aff6
 .availability-pill.ready{background:#e6f5d9;color:#436c22}
 .availability-pill.consult{background:#fff2df;color:#96602e}
 @media(max-width:740px){.hero-commerce .hero-inner{grid-template-columns:1fr}.hero-commerce .hero-copy{padding:60px 7vw 35px}.commerce-hero-art{min-height:370px;margin:0 5vw 28px}.commerce-art-bottom b{font-size:23px}.commerce-mascot{width:125px;bottom:15%}}
+
+.no-photo{display:flex;flex-direction:column;align-items:center;gap:10px;color:#9cae78}
+.no-photo>span{font-size:48px}
+.no-photo small{font:800 9px Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#9ba28e}

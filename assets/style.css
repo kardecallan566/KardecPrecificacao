@@ -191,3 +191,23 @@ html[data-design="space"] .mascot-orbit img{filter:drop-shadow(0 0 22px #a99aff6
 @media(max-width:950px){.mascot-orbit{right:3%;top:0;width:clamp(125px,25vw,210px)}}
 @media(max-width:700px){.mascot-orbit{right:0;top:0;width:120px}.mascot-orbit span{font-size:6px;padding:6px 8px}.hero-showroom .hero-copy{padding-top:170px}}
 @media(prefers-reduced-motion:reduce){.mascot-orbit{animation:none}}
+
+/* Correção de direção de arte: mascote é assinatura, não produto/obstáculo */
+.hero-showroom .hero-inner{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);max-width:1560px}
+.hero-showroom .hero-copy{padding:clamp(65px,7vw,105px) clamp(28px,5vw,78px)}
+.hero-showroom h1{white-space:normal;font-size:clamp(44px,5.1vw,76px);max-width:650px;line-height:1.02}
+.hero-showroom h1 em{display:inline-block}
+.showroom-stage{isolation:isolate;background-color:#171c35;background-image:radial-gradient(ellipse at 55% 40%,#343b63 0%,#202642 48%,#151a30 100%);min-height:610px}
+.showroom-stage:before{content:"";position:absolute;inset:0;background-image:radial-gradient(#b8c5ff35 1px,transparent 1px);background-size:29px 29px;opacity:.45;mask-image:linear-gradient(to bottom,#000,transparent 92%)}
+.showroom-stage .stage-orbit{border-color:#b9c4ff22;box-shadow:0 0 0 30px #b9c4ff08,0 0 0 65px #b9c4ff05}
+.mascot-orbit{width:clamp(95px,10vw,145px);right:3%;top:3%;z-index:6;transform:rotate(3deg);animation:mascot-float 6s ease-in-out infinite}
+.mascot-orbit img{filter:drop-shadow(0 10px 12px #080b1b66)}
+.mascot-orbit span{font-size:6px;letter-spacing:.12em;padding:6px 8px;margin-top:-5px}
+.figure{filter:drop-shadow(0 16px 13px #090d1b55)}
+.stage-label-top{color:#c7d0ff}
+.stage-caption{color:#c7d0ff}
+.stage-caption span{color:#b9e64c}
+.hero-bottom{flex-wrap:wrap;white-space:normal;line-height:1.5}
+.hero-showroom .hero-copy:before{border-color:#ffffff0b;box-shadow:0 0 0 45px #ffffff03,0 0 0 90px #ffffff02}
+@media(max-width:1000px){.hero-showroom .hero-inner{grid-template-columns:1fr}.hero-showroom .hero-copy{padding:65px 7vw 42px}.showroom-stage{min-height:520px}.mascot-orbit{width:115px;right:3%;top:2%}}
+@media(max-width:700px){.showroom-stage{min-height:420px}.mascot-orbit{width:90px;right:2%;top:2%}.mascot-orbit span{display:none}.hero-showroom h1{font-size:clamp(40px,10vw,60px)}.hero-showroom .hero-copy{padding-top:55px}}

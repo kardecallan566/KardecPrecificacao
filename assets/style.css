@@ -368,3 +368,15 @@ html[data-event="pride"] .season-particle{filter:drop-shadow(0 0 5px #c8a4f7)}
 html[data-event="blackfriday"] .season-particle{color:#202020}
 @keyframes season-drift{0%{transform:translateY(-10vh) rotate(0)}100%{transform:translateY(115vh) rotate(260deg)}}
 @media(prefers-reduced-motion:reduce){.season-particle{animation:none;top:12vh}}
+
+html[data-design="retro"]{--lime:#ffcc4d;--coral:#f35d4f;--cream:#fff4d8}
+html[data-design="retro"] .hero-commerce h1 em,html[data-design="retro"] .section-head h2 em{color:#f35d4f}
+html[data-design="retro"] .commerce-hero-art{background:linear-gradient(145deg,#ffdf85,#f8a17c)}
+html[data-design="retro"] .product-card{border:2px solid #292c27;box-shadow:4px 4px 0 #292c27;border-radius:4px}
+html[data-design="retro"] .product-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 #292c27}
+html[data-design="nature"] .hero-commerce h1 em,html[data-design="nature"] .section-head h2 em{color:#688b55}
+html[data-design="nature"] .commerce-hero-art{background:linear-gradient(145deg,#e3ead7,#a7c39a)}
+html[data-design="nature"] .product-card{border-radius:22px;border-color:#d9e2d2}
+html[data-design="nature"] .product-photo{background:radial-gradient(circle,#f7f8ed,#e4eadc)}
+html[data-design="nature"] .hero-commerce .button.primary{background:#688b55}
+html[data-design="nature"] .product-price a{background:#688b55}

@@ -352,3 +352,19 @@ body{background:#f8f5ed;color:#292c27}
 .detail-grid .muted{font-size:12px;line-height:1.7;color:#7c8174}
 @media(max-width:950px){.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.detail-grid{grid-template-columns:1fr;gap:22px}.detail-gallery{position:relative;top:auto}.detail-grid>div:last-child{padding:26px}}
 @media(max-width:650px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product-body{padding:14px}.product-body h3{font-size:13px}.product-price b{font-size:18px}.hero-commerce .hero-inner{grid-template-columns:1fr}.hero-commerce .hero-copy{padding:55px 7vw 35px}.commerce-hero-art{min-height:370px;margin:0 5vw 25px}.section{padding:60px 5vw}.section-head{align-items:start;flex-direction:column}.collection-grid{grid-template-columns:1fr}.collection-card{min-height:230px}}
+
+/* seasonal event atmosphere: restrained, elegant, accessible */
+.season-layer{position:fixed;inset:0;pointer-events:none;z-index:19;overflow:hidden;opacity:0;transition:opacity .35s}
+.season-layer[data-active="true"]{opacity:1}
+.season-particle{position:absolute;top:-8vh;font-size:clamp(15px,2vw,28px);opacity:.22;animation:season-drift 18s linear infinite;filter:drop-shadow(0 3px 4px #2222)}
+.season-particle.p1{left:8%;animation-delay:-2s}.season-particle.p2{left:27%;animation-delay:-9s}.season-particle.p3{left:51%;animation-delay:-5s}.season-particle.p4{left:73%;animation-delay:-13s}.season-particle.p5{left:91%;animation-delay:-7s}
+html[data-event="halloween"] .season-particle{color:#f07838}
+html[data-event="christmas"] .season-particle{color:#27865d}
+html[data-event="valentine"] .season-particle{color:#ed6a91}
+html[data-event="easter"] .season-particle{color:#9b80d7}
+html[data-event="june"] .season-particle,html[data-event="carnival"] .season-particle{color:#db8d32}
+html[data-event="newyear"] .season-particle{color:#d5a83b}
+html[data-event="pride"] .season-particle{filter:drop-shadow(0 0 5px #c8a4f7)}
+html[data-event="blackfriday"] .season-particle{color:#202020}
+@keyframes season-drift{0%{transform:translateY(-10vh) rotate(0)}100%{transform:translateY(115vh) rotate(260deg)}}
+@media(prefers-reduced-motion:reduce){.season-particle{animation:none;top:12vh}}

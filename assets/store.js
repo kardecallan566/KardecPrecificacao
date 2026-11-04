@@ -1,7 +1,8 @@
 const $=s=>document.querySelector(s);
 const state={products:[],category:'Todos',availability:'all',query:'',sort:'featured'};
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const norm=s=>String(s??'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();\nconst fmt=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n);
+const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const fmt=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n);
 const safeUrl=x=>{try{const u=new URL(x,location.origin);return ['https:','http:'].includes(u.protocol)?u.href:'#'}catch{return '#'}};
 async function fetchJson(path){const r=await fetch(path);if(!r.ok)throw Error('Ainda não foi possível carregar.');return r.json()}
 function render(){

@@ -10,7 +10,7 @@ O repositório é público: não coloque credenciais nele. As rotas `/api/admin/
 
 Um link do MakerWorld **não concede licença comercial**. O importador tenta consultar metadados públicos; caso a API não responda, preenche o título pelo slug. Nunca inventa peso, tempo ou autorização. Produtos importados ficam em rascunho. A publicação exige fotos próprias e licença `approved` com comprovante (ou `own_design` sem modelo de terceiro). Decorações de LED são **somente para velas elétricas**; não use chama real com PETG/PLA.
 
-## Testes sem dependências
+## Plano de evolução\n\nConsulte [`ROADMAP_DESIGN_E_COMERCIAL.md`](./ROADMAP_DESIGN_E_COMERCIAL.md) para o planejamento vivo de design, loja, produtos, blog, mascote, campanhas, painel e qualidade.\n\n## Testes sem dependências
 
 ```bash
 npm test

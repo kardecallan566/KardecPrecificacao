@@ -380,3 +380,32 @@ html[data-design="nature"] .product-card{border-radius:22px;border-color:#d9e2d2
 html[data-design="nature"] .product-photo{background:radial-gradient(circle,#f7f8ed,#e4eadc)}
 html[data-design="nature"] .hero-commerce .button.primary{background:#688b55}
 html[data-design="nature"] .product-price a{background:#688b55}
+
+/* Collections as tactile editorial tiles */
+.collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.collection-card{min-height:310px;padding:24px 26px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;position:relative;isolation:isolate;transition:transform .25s,box-shadow .25s}
+.collection-card:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,#26302612 55%,#26302625);z-index:-1}
+.collection-card:hover{transform:translateY(-6px) rotate(-.25deg);box-shadow:0 22px 38px #29332418}
+.collection-number{font-size:9px;letter-spacing:.16em;font-weight:900;color:#69745d}
+.collection-art{height:145px;width:100%;margin:0 0 15px;display:flex;align-items:center;justify-content:center;gap:8px}
+.collection-art i{font-size:clamp(38px,5vw,66px);text-shadow:0 15px 20px #384d2b20;transition:transform .25s}
+.collection-card:hover .collection-art i:nth-child(1){transform:translateY(-7px) rotate(-10deg)}
+.collection-card:hover .collection-art i:nth-child(2){transform:translateY(-12px) scale(1.08)}
+.collection-card:hover .collection-art i:nth-child(3){transform:translateY(-4px) rotate(8deg)}
+.collection-card strong{font-size:clamp(19px,2vw,25px);font-weight:900;letter-spacing:-.06em;margin-bottom:7px;color:#2b3428}
+.collection-card small{font-size:11px;color:#687264;line-height:1.6}
+.collection-arrow{position:absolute;right:22px;top:22px;width:34px;height:34px;display:grid;place-items:center;border:1px solid #ffffffa8;border-radius:50%;font-size:15px;color:#4b5b3f}
+.collection-figures{background:linear-gradient(145deg,#e8f0d6,#c7df9d)}
+.collection-home{background:linear-gradient(145deg,#f7e6dc,#efc6b5)}
+.collection-gifts{background:linear-gradient(145deg,#e0f0eb,#b2dcd0)}
+.catalog-meta{padding:12px 0;border-bottom:1px solid #e8e2d8;margin-bottom:20px}
+.catalog-meta label{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;color:#777d70}
+.catalog-meta select{border:1px solid #e3ded3;border-radius:9px;padding:9px 12px;background:#fffdf8;font-size:11px}
+.product-photo{overflow:hidden}
+.product-photo img{object-fit:contain;padding:12px;mix-blend-mode:multiply;transition:transform .4s}
+.product-card:hover .product-photo img{transform:scale(1.05)}
+.product-card .pill{background:#2e382b;color:#e6f3c8;border-radius:100px}
+.product-card .product-price a{background:#ff765f;color:white;border-color:#ff765f}
+.product-card .product-detail-link{font-size:10px;letter-spacing:.02em}
+@media(max-width:850px){.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.collection-card{min-height:270px}}
+@media(max-width:560px){.collection-grid{grid-template-columns:1fr}.collection-card{min-height:230px}.collection-art{height:100px}}

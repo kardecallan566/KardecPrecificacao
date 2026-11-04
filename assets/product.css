@@ -8,3 +8,17 @@
 .detail-thumb.active{border:2px solid #b5d957;box-shadow:0 0 0 3px #b5d95735}
 .detail-image img{transition:opacity .2s}
 @media(max-width:650px){.detail-thumb{width:62px;height:62px}}
+
+.related-products{max-width:1320px;margin:85px auto 0;padding:0 5vw}
+.related-heading{margin-bottom:24px}
+.related-heading h2{font-size:clamp(28px,3vw,42px);letter-spacing:-.07em;margin:8px 0;color:#2d352a}
+.related-heading h2 em{font-style:normal;color:#ff765f}
+.related-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.related-card{display:flex;flex-direction:column;gap:10px;background:#fffdf8;border:1px solid #e8e2d8;border-radius:15px;padding:12px;color:#30352d;transition:transform .2s,box-shadow .2s}
+.related-card:hover{transform:translateY(-4px);box-shadow:0 15px 30px #33351f10}
+.related-photo{aspect-ratio:1;background:#f0eee5;border-radius:10px;display:grid;place-items:center;overflow:hidden}
+.related-photo img{width:100%;height:100%;object-fit:contain;padding:8px;mix-blend-mode:multiply}
+.related-photo span{font-size:35px;color:#a8c966}
+.related-card b{font-size:12px;line-height:1.5;min-height:36px}
+.related-card strong{font-size:16px;color:#758f42}
+@media(max-width:760px){.related-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.related-products{margin-top:55px;padding:0 5vw}}

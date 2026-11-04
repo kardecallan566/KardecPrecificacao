@@ -22,3 +22,13 @@
 .related-card b{font-size:12px;line-height:1.5;min-height:36px}
 .related-card strong{font-size:16px;color:#758f42}
 @media(max-width:760px){.related-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.related-products{margin-top:55px;padding:0 5vw}}
+
+.detail-grid .price-note{font-size:10px;color:#85877d;margin:-12px 0 17px}
+.detail-actions .button.secondary{background:transparent;color:#5e7540;border:1px solid #dce4ce}
+.detail-actions .button.secondary:hover{background:#eef4e4}
+.detail-actions .button{font-weight:900;letter-spacing:.01em;text-align:center;text-decoration:none}
+.detail-grid .price{margin-bottom:13px}
+.detail-grid .detail-description p{margin:0 0 12px}
+.detail-grid .detail-description p:last-child{margin-bottom:0}
+.detail-back{display:inline-flex;padding:9px 0;transition:color .2s}.detail-back:hover{color:#ff765f}
+.detail-thumb:focus-visible,.detail-actions a:focus-visible,.related-card:focus-visible{outline:3px solid #a9cb53;outline-offset:3px}

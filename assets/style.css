@@ -409,3 +409,13 @@ html[data-design="nature"] .product-price a{background:#688b55}
 .product-card .product-detail-link{font-size:10px;letter-spacing:.02em}
 @media(max-width:850px){.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.collection-card{min-height:270px}}
 @media(max-width:560px){.collection-grid{grid-template-columns:1fr}.collection-card{min-height:230px}.collection-art{height:100px}}
+
+/* Jornada de compra — home KLG */
+.how-section{padding-top:78px;padding-bottom:82px}
+.how-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+.how-grid article{position:relative;min-height:220px;padding:28px;border:1px solid #e8e5dc;border-radius:20px;background:linear-gradient(145deg,#fffdf8,#f7f7ef)}
+.how-number{position:absolute;right:22px;top:20px;font-size:11px;font-weight:900;letter-spacing:.12em;color:#9ca58e}
+.how-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#e6efcf;color:#34452b;font-size:24px;font-weight:800;margin-bottom:24px}
+.how-grid h3{font-size:21px;letter-spacing:-.04em;margin:0 0 10px;color:#252d24}
+.how-grid p{max-width:260px;font-size:13px;line-height:1.75;color:#73796e;margin:0}
+@media(max-width:700px){.how-section{padding-top:52px;padding-bottom:55px}.how-grid{grid-template-columns:1fr}.how-grid article{min-height:175px;padding:23px}.how-icon{margin-bottom:17px}}

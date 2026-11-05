@@ -17,13 +17,13 @@ A KLG deve ser uma loja de impressão 3D acolhedora, autoral e confiável. Produ
 - [ ] Definir fallback elegante para produto sem foto (sem sugerir que seja produto real).
 - [x] Ordenação: destaque, recentes, menor/maior preço e nome A–Z implementados; busca e estado vazio disponíveis.
 - [ ] Melhorar CTA: pronta-entrega → comprar; sob encomenda → WhatsApp com mensagem contextual.
-- [ ] Adicionar produtos relacionados e continuar explorando.
+- [x] Adicionar produtos relacionados e continuar explorando.
 - [ ] Revisar preço, estoque, disponibilidade e links quebrados em todos os estados.
 
 ### 2 — Página inicial (redesign completo)
 - [ ] Vitrine de produtos reais em destaque (não mockups genéricos).
 - [x] Cards de coleção acionam busca contextual no catálogo (miniaturas, decoração e presentes).
-- [ ] Bloco de confiança: processo, personalização, envio/retirada e canais reais.
+- [x] Explicar jornada de compra em três passos (explorar, conversar e produzir).\n- [ ] Bloco de confiança: processo, personalização, envio/retirada e canais reais.
 - [ ] Banner sazonal configurável sem esconder produtos nem prejudicar legibilidade.
 - [ ] CTA principal e secundário com destino funcional.
 - [ ] Mobile-first: hero, filtros, cards e menu sem overflow.

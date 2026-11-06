@@ -88,3 +88,8 @@ Consulte [SECURITY_REVIEW.md](SECURITY_REVIEW.md) para a auditoria de endpoints,
 **Obrigatório antes da publicação:** aplicar `migrations/0003_security.sql`, `migrations/0004_customers_tasks.sql` e `migrations/0005_kardlottgeek_brand.sql` depois das anteriores, fazer backup do D1, restringir com Access `/admin/*` e `/api/admin/*` em produção e preview, manter `LOCAL_DEV` desligado, configurar limites de requisições no WAF e usar secrets no Pages. Todos os POST/PUT/DELETE do painel exigem `X-Zynutz-Admin: 1`, `Origin` coerente quando presente e tipos de conteúdo adequados.
 
 O arquivo `_headers` só protege arquivos estáticos no Pages; as páginas HTML dinâmicas agora recebem CSP, X-Frame-Options e demais cabeçalhos diretamente da Function. **Mídias carregadas em R2 são acessíveis a quem possuir o link aleatório**, incluindo fotos de produtos ainda em rascunho; não envie dados pessoais ou fotografias confidenciais.
+
+
+## Próxima evolução: Commerce + Analytics
+
+O planejamento da evolução da página de produto, dashboard avançado, heatmap, analytics com privacidade, segurança e integração logística está em [ROADMAP_COMMERCE_ANALYTICS.md](ROADMAP_COMMERCE_ANALYTICS.md). A hospedagem Cloudflare Pages segue como arquitetura funcional; GitHub Pages não executa Functions/D1/R2 e exigiria backend separado.

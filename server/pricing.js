@@ -1,5 +1,5 @@
 // Motor determinístico em centavos e decimais: mesmo algoritmo no browser e Cloudflare.
-export const DEFAULT_COSTS = Object.freeze({filamentKg:80,energyKwh:1.10,printerWatts:120,packaging:1.20,machineHourly:1.50,laborHourly:20,laborMinutes:10,wastePercent:5,failurePercent:5,marketplacePercent:20,marketplaceFixed:4.50,taxPercent:0,targetMarginPercent:25,adsPerSale:0,extras:0});
+export const DEFAULT_COSTS = Object.freeze({filamentKg:80,energyKwh:1.10,printerWatts:120,packaging:1.20,machineHourly:1.50,laborHourly:20,laborMinutes:10,wastePercent:5,failurePercent:5,shopeePercent:20,shopeeFixed:4.50,shopeeFreeShipping:0,mercadoLivrePercent:16,mercadoLivreFixed:6.00,mercadoLivreShipping:0,marketplacePercent:20,marketplaceFixed:4.50,taxPercent:0,targetMarginPercent:25,adsPerSale:0,extras:0});
 const positive = (v,name,max=1e7)=>{const n=Number(v);if(!Number.isFinite(n)||n<0||n>max)throw new Error(`${name}: informe um número válido`);return n;};
 const round2=n=>Math.round((n+Number.EPSILON)*100)/100;
 export function calculateQuote(input,overrides={}){

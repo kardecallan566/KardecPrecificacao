@@ -21,17 +21,12 @@ export function calculateQuote(input,overrides={}){
  const ads=c.adsPerSale;
  for(const [k,v] of Object.entries({labor,packing,extras}))positive(v,k);
  const production=material+energy+failure+machine+labor+packing+extras+ads;
- const fixed=c.marketplaceFixed;
- const rate=(c.marketplacePercent+c.taxPercent)/100;
  const margin=c.targetMarginPercent/100;
- const breakEven=(production+fixed)/(1-rate);
- if(1-rate-margin<=0) throw new Error('Margem desejada + taxas precisam ser menores que 100%');
- const suggested=(production+fixed)/(1-rate-margin);
- const price=Number(input.salePrice)>0?positive(input.salePrice,'Preço de venda'):Math.ceil(suggested*10)/10;
- const marketplace=price*c.marketplacePercent/100+fixed;
- const taxes=price*c.taxPercent/100;
- const contribution=price-marketplace-taxes-production;
- return {input:{grams,hours,units},costs:{material:round2(material),energy:round2(energy),failures:round2(failure),machine:round2(machine),labor:round2(labor),packaging:round2(packing),extras:round2(extras),ads:round2(ads),production:round2(production),marketplace:round2(marketplace),taxes:round2(taxes)},breakEven:round2(breakEven),suggested:round2(suggested),salePrice:round2(price),contribution:round2(contribution),netMarginPercent:price?round2(contribution/price*100):0,printerHourly:hours>0?round2(contribution*units/hours):0,assumptions: price>=80?'Estimativa: valores acima de R$ 79,99 podem ter outra tarifa fixa; confira sua faixa Shopee, tributos e custos reais.':'Estimativa: taxas editáveis; confira sua faixa Shopee, tributos e custos reais.'};
+ const calc=(percent,fixedFn,extra=0)=>{const rate=(percent+c.taxPercent)/100;if(rate+margin>=1)throw new Error('Margem + taxas precisam ser menores que 100%');const feeFixed=price=>fixedFn(price);let price=(production+feeFixed(100)+extra)/(1-rate-margin);for(let i=0;i<12;i++)price=(production+feeFixed(price)+extra)/(1-rate-margin);const suggested=Math.ceil(price*100)/100;const actual=Number(input.salePrice)>0?positive(input.salePrice,'Preço informado'):suggested;const fixed=feeFixed(actual),fees=actual*percent/100+fixed+extra,taxes=actual*c.taxPercent/100,contribution=actual-fees-taxes-production;return{percent,fixed,extra,breakEven:round2((production+fixed+extra)/(1-rate)),suggested:round2(suggested),salePrice:round2(actual),fees:round2(fees),taxes:round2(taxes),contribution:round2(contribution),marginPercent:actual?round2(contribution/actual*100):0};};
+ const shopee=calc(c.shopeePercent,price=>price<9?price/2:price<80?4.5:price<100?16:price<200?20:26,c.shopeeFreeShipping);
+ const mercadoLivre=calc(c.mercadoLivrePercent,()=>c.mercadoLivreFixed,c.mercadoLivreShipping);
+ const legacy=calc(c.marketplacePercent,()=>c.marketplaceFixed,0);
+ return {input:{grams,hours,units},costs:{material:round2(material),energy:round2(energy),failures:round2(failure),machine:round2(machine),labor:round2(labor),packaging:round2(packing),extras:round2(extras),ads:round2(ads),production:round2(production)},platforms:{shopee,mercadoLivre},breakEven:legacy.breakEven,suggested:legacy.suggested,salePrice:legacy.salePrice,contribution:legacy.contribution,netMarginPercent:legacy.marginPercent,printerHourly:hours>0?round2(legacy.contribution*units/hours):0,assumptions:'Estimativas parametrizadas. Tarifas, frete, categoria, modalidade e regras variam por conta; confira o simulador oficial antes de publicar.'};
 }
 export function parseMakerworldUrl(text){
  let url;try{url=new URL(text)}catch{throw new Error('Cole uma URL válida do MakerWorld');}

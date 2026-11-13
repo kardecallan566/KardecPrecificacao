@@ -1,6 +1,6 @@
 # Kardlottgeek (KLG) · Loja + Precificação MakerWorld
 
-Plataforma da Kardlottgeek (KLG) para apresentar produtos de impressão 3D e encaminhar compras à Shopee: catálogo público, catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais e calculadora MakerWorld/marketplaces.
+Plataforma da Kardlottgeek (KLG) para apresentar produtos de impressão 3D e encaminhar compras à Shopee: catálogo público unificado (produtos próprios e afiliados), catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais e calculadora MakerWorld/marketplaces.
 
 **Status:** MVP de loja, precificação e gestão comercial em evolução diretamente na `main`. Já há cadastro de clientes e tarefas, contexto de negócio e chat com Ollama local. O assistente pode preparar uma tarefa e só a cria após confirmação explícita no painel. Falta configurar Cloudflare Pages, D1, R2, Cloudflare Access, inserir suas fotos reais e confirmar a licença dos modelos comerciais. A loja **não** cria pagamentos, não recebe pedidos diretamente e não sincroniza pedidos da Shopee automaticamente. O painel permite cadastrar as vendas reais manualmente e desconta o estoque com trilha de auditoria.
 

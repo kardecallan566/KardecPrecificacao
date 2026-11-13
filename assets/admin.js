@@ -57,5 +57,18 @@ $('#view').addEventListener('submit',async e=>{e.preventDefault();const f=e.targ
  if(f.id==='appearanceForm'){await api('settings','PUT',{visual_design:val(f,'visual_design'),season_event:val(f,'season_event')});await refresh();render();return notice('Aparência publicada na loja!');}
  if(f.id==='settingsForm'){const data={...fObj(f),default_costs:cfg(f)};for(const k of costume)delete data[k];await api('settings','PUT',data);await refresh();render();return notice('Configurações salvas.');}
 }catch(error){notice(error.message,true)}});
-async function boot(){try{const me=await api('me');$('#authStatus').textContent=`● ${me.email}`;await refresh();render()}catch(e){$('#authStatus').textContent='Não autenticado';$('#view').innerHTML=`<div class="panel"><h2>O painel está protegido.</h2><p class="muted">Configure Cloudflare Access para o caminho <code>/api/admin/*</code> e <code>/admin/*</code>, e os três secrets obrigatórios no Pages. Para testar localmente, defina LOCAL_DEV=true e LOCAL_DEV_TOKEN no arquivo .dev.vars e informe o token abaixo.</p><div class="grid">${field('devToken','Token local (somente localhost)','','password','autocomplete="off"')}<button id="localConnect" class="btn orange">Entrar no modo local</button></div><p class="danger-text">${esc(e.message)}</p></div>`;$('#localConnect').addEventListener('click',async()=>{state.localToken=$('#f-devToken').value;await boot()})}}
+async function boot(){
+  // Fail closed: nenhum conteúdo ou navegação administrativa é montado antes da autenticação.
+  document.body.innerHTML='<main id="authGate" style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#f6f7f7;font:14px Inter,Segoe UI,Arial;color:#243333"><section style="width:min(460px,100%);padding:32px;background:white;border:1px solid #e5e9e5;border-radius:12px"><p style="color:#c47d4d;font-weight:900;letter-spacing:.15em;font-size:11px">KARDLOTTGEEK · ÁREA RESTRITA</p><h1 style="font-size:25px;margin:12px 0">Verificando acesso…</h1><p id="authMessage" style="color:#7e8a87">Validando sua sessão segura.</p></section></main>';
+  try {
+    const me=await api('me');
+    // Recria a interface somente depois que /api/admin/me confirmar a sessão.
+    location.reload();
+    return;
+  } catch(e) {
+    const local=location.hostname==='localhost'||location.hostname==='127.0.0.1';
+    document.querySelector('#authGate').innerHTML='<section style="width:min(460px,100%);padding:32px;background:white;border:1px solid #e5e9e5;border-radius:12px"><p style="color:#c47d4d;font-weight:900;letter-spacing:.15em;font-size:11px">KARDLOTTGEEK · ÁREA RESTRITA</p><h1 style="font-size:25px;margin:12px 0">Login obrigatório</h1><p style="color:#7e8a87;line-height:1.7">A sessão não foi validada. O painel e suas abas permanecerão bloqueados até autenticar. Entre pelo Cloudflare Access e recarregue esta página.</p>'+ (local?'<label for="localToken">Token de desenvolvimento local</label><input id="localToken" type="password" autocomplete="off" style="display:block;width:100%;padding:12px;margin:10px 0;border:1px solid #dfe6e1;border-radius:6px"><button id="localLogin" style="padding:12px 18px;background:#ec8b55;border:0;border-radius:6px;font-weight:800;cursor:pointer">Entrar localmente</button>':'')+'<p style="color:#a04436;font-size:12px;margin-top:16px">'+String(e.message||'Acesso negado').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</p><a href="/" style="display:inline-block;margin-top:12px;color:#35564c">← Voltar à loja</a></section>';
+    if(local)document.querySelector('#localLogin').addEventListener('click',()=>{state.localToken=document.querySelector('#localToken').value;boot()});
+  }
+}
 boot();

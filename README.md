@@ -13,8 +13,8 @@ Um link do MakerWorld **não concede licença comercial**. O importador tenta co
 ## Plano de evolução\n\nConsulte [`ROADMAP_DESIGN_E_COMERCIAL.md`](./ROADMAP_DESIGN_E_COMERCIAL.md) para o planejamento vivo de design, loja, produtos, blog, mascote, campanhas, painel e qualidade.\n\n## Testes sem dependências
 
 ```bash
-npm test
-npm run build
+pnpm test
+pnpm run build
 ```
 
 ## Arquitetura de hospedagem (decisão)
@@ -25,7 +25,7 @@ Se no futuro o frontend for hospedado no GitHub Pages, será obrigatório manter
 
 ## Cloudflare Pages
 
-1. Conecte `kardecallan566/KardecPrecificacao` via integração Git (não use Direct Upload para Pages Functions). Configure `npm run build` como comando e `dist` como diretório.
+1. Conecte `kardecallan566/KardecPrecificacao` via integração Git (não use Direct Upload para Pages Functions). Configure `pnpm run build` como comando e `dist` como diretório. O projeto usa pnpm no build; o Cloudflare detectará pnpm pelo lockfile quando ele estiver versionado (ou poderá executar pnpm via configuração de build).
 2. Crie o D1 `zynutz-3d-db` e o bucket R2 `zynutz-3d-media`. No painel Pages > Settings > Bindings, associe `DB` (D1) e `MEDIA` (R2). O exemplo `wrangler.toml.example` contém a estrutura caso prefira Wrangler. Não salve o ID real diretamente em arquivo público se não quiser expô-lo.
 3. Instale Wrangler localmente (`npm install`) e execute `npx wrangler d1 migrations apply zynutz-3d-db --remote` usando sua configuração `wrangler.toml` já preenchida. **Aplique todas as migrations 0001 a 0005**, para criar estoque, histórico de orçamentos e vendas. Para criar o banco local, use `--local`.
 4. Crie um aplicativo **Cloudflare Access** (self-hosted) com política restrita ao seu e-mail para `/admin/*` e `/api/admin/*`; proteja a prévia também. No Pages > Variables and Secrets, configure `CF_ACCESS_TEAM_DOMAIN` (ex.: `minha-equipe.cloudflareaccess.com`), `CF_ACCESS_AUD` (AUD do app Access) e `ADMIN_EMAIL`.

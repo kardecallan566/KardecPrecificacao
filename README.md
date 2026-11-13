@@ -1,6 +1,6 @@
 # Kardlottgeek (KLG) · Loja + Precificação MakerWorld
 
-Plataforma da Kardlottgeek (KLG) para apresentar produtos de impressão 3D e encaminhar compras à Shopee: catálogo público, catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais, e uma calculadora que recebe um link do MakerWorld.
+Plataforma da Kardlottgeek (KLG) para apresentar produtos de impressão 3D e encaminhar compras à Shopee: catálogo público, catálogo por categorias, preços, estoque auditável, fotos e vídeos em R2, artigos de blog com páginas indexáveis, redes sociais e calculadora MakerWorld/marketplaces.
 
 **Status:** MVP de loja, precificação e gestão comercial em evolução diretamente na `main`. Já há cadastro de clientes e tarefas, contexto de negócio e chat com Ollama local. O assistente pode preparar uma tarefa e só a cria após confirmação explícita no painel. Falta configurar Cloudflare Pages, D1, R2, Cloudflare Access, inserir suas fotos reais e confirmar a licença dos modelos comerciais. A loja **não** cria pagamentos, não recebe pedidos diretamente e não sincroniza pedidos da Shopee automaticamente. O painel permite cadastrar as vendas reais manualmente e desconta o estoque com trilha de auditoria.
 
@@ -16,6 +16,12 @@ Um link do MakerWorld **não concede licença comercial**. O importador tenta co
 npm test
 npm run build
 ```
+
+## Arquitetura de hospedagem (decisão)
+
+**Produção permanece em Cloudflare Pages + Pages Functions + D1 + R2.** O GitHub é o repositório de código e pode executar CI/CD; GitHub Pages não substitui Cloudflare Pages neste projeto. GitHub Pages hospeda somente arquivos estáticos e não executa `functions/`, não fornece bindings D1/R2 nem autenticação server-side do Cloudflare Access. Uma publicação estática isolada perderia cadastro persistente, admin, vendas e API.
+
+Se no futuro o frontend for hospedado no GitHub Pages, será obrigatório manter uma API independente na Cloudflare (ou outro backend), configurar CORS para o domínio `github.io`, e apontar o cliente para essa API. **Não publicar o painel administrativo como site estático público sem autenticação backend.**
 
 ## Cloudflare Pages
 

@@ -19,14 +19,18 @@ function normalizeProduct(v){
  const images=(Array.isArray(v.images)?v.images:[]).filter(x=>typeof x==='string'&&mediaUrl(x)).slice(0,12);
  const videos=(Array.isArray(v.videos)?v.videos:[]).filter(x=>typeof x==='string'&&mediaUrl(x)).slice(0,5);
  const source=link(v.sourceUrl),status=['draft','published','archived'].includes(v.status)?v.status:'draft';
+ const productKind=['own','affiliate'].includes(v.productKind)?v.productKind:'own';
+ const purchaseUrl=link(v.purchaseUrl),affiliateNetwork=text(v.affiliateNetwork,60),affiliateDisclosure=text(v.affiliateDisclosure||'Link de afiliado: podemos receber comissão pela compra.',300);
  const licenseStatus=['pending','approved','rejected','own_design'].includes(v.licenseStatus)?v.licenseStatus:'pending';
  const licenseReference=text(v.licenseReference,500);
  if(status==='published'){
-  if(!licenseAllowed(licenseStatus,licenseReference,source))throw Object.assign(new Error('Antes de publicar: registre licença comercial ou indique design próprio sem link externo.'),{status:400});
-  if(images.length<1)throw Object.assign(new Error('Adicione ao menos uma foto sua do produto antes de publicar'),{status:400});
-  if(number(v.price,'Preço')<=0)throw Object.assign(new Error('Preço positivo é obrigatório'),{status:400});
+  if(images.length<1)throw Object.assign(new Error('Adicione ao menos uma imagem antes de publicar'),{status:400});
+  if(productKind==='own'&&!licenseAllowed(licenseStatus,licenseReference,source))throw Object.assign(new Error('Antes de publicar: registre licença comercial ou indique design próprio sem link externo.'),{status:400});
+  if(productKind==='own'&&number(v.price,'Preço')<=0)throw Object.assign(new Error('Preço positivo é obrigatório'),{status:400});
+  if(productKind==='affiliate'&&!purchaseUrl)throw Object.assign(new Error('Produto afiliado publicado precisa de URL de compra válida'),{status:400});
+  if(false&&number(v.price,'Preço')<=0)throw Object.assign(new Error('Preço positivo é obrigatório'),{status:400});
  }
- return {slug,name,description:text(v.description,8000),category:text(v.category||'Decoração',70),price_cents:cents(v.price??0,'Preço'),stock:Math.floor(number(v.stock??0,'Estoque',0,100000)),status,source_url:source,profile_id:text(v.profileId,30),designer:text(v.designer,140),license_status:licenseStatus,license_reference:licenseReference,images_json:JSON.stringify(images),videos_json:JSON.stringify(videos),shopee_url:link(v.shopee),featured:v.featured?1:0,material:text(v.material||'PETG',30),grams:number(v.grams??0,'Gramas'),print_hours:number(v.hours??0,'Horas'),labor_minutes:number(v.laborMinutes??10,'Trabalho manual'),packaging_cents:cents(v.packaging??1.2,'Embalagem'),extras_cents:cents(v.extras??0,'Insumos'),price_config_json:JSON.stringify(costConfig(v.priceConfig||{}))};
+ return {slug,name,description:text(v.description,8000),category:text(v.category||'Decoração',70),price_cents:cents(v.price??0,'Preço'),stock:productKind==='affiliate'?0:Math.floor(number(v.stock??0,'Estoque',0,100000)),status,product_kind:productKind,purchase_url:purchaseUrl,affiliate_network:affiliateNetwork,affiliate_disclosure:productKind==='affiliate'?affiliateDisclosure:'',source_url:source,profile_id:text(v.profileId,30),designer:text(v.designer,140),license_status:licenseStatus,license_reference:licenseReference,images_json:JSON.stringify(images),videos_json:JSON.stringify(videos),shopee_url:link(v.shopee),featured:v.featured?1:0,material:text(v.material||'PETG',30),grams:number(v.grams??0,'Gramas'),print_hours:number(v.hours??0,'Horas'),labor_minutes:number(v.laborMinutes??10,'Trabalho manual'),packaging_cents:cents(v.packaging??1.2,'Embalagem'),extras_cents:cents(v.extras??0,'Insumos'),price_config_json:JSON.stringify(costConfig(v.priceConfig||{}))};
 }
 function normalizePost(v){const title=text(v.title,180),slug=slugify(v.slug||title);if(!slug||!title)throw Object.assign(new Error('Título e slug obrigatórios'),{status:400});return{title,slug,excerpt:text(v.excerpt,350),body:text(v.body,50000),cover_url:mediaUrl(v.cover)?text(v.cover,1000):'',tags_json:JSON.stringify(Array.isArray(v.tags)?v.tags.map(x=>text(x,40)).slice(0,8):[]),status:v.status==='published'?'published':'draft'};}
 const dbReady=env=>env.DB?null:json({error:'Configure o D1 no Cloudflare antes de usar o painel.'},503);

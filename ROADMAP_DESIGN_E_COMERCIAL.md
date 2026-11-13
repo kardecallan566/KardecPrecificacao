@@ -7,6 +7,18 @@ A KLG deve ser uma loja de impressão 3D acolhedora, autoral e confiável. Produ
 
 ## Fases
 
+### 0 — Catálogo comercial unificado (em implementação)
+- [x] Modelar produto próprio e afiliado no mesmo registro de catálogo.
+- [x] Campos de canal/link de compra e aviso de afiliado.
+- [x] Formulário administrativo para origem comercial e dados afiliados.
+- [x] Validação de publicação específica para produtos próprios e afiliados.
+- [x] Renderizar afiliados na mesma grade e página de produto.
+- [ ] Redirecionamento rastreável com registro de cliques.
+- [ ] Links múltiplos por produto (Shopee, Mercado Livre e afiliados).
+- [ ] Relatório de cliques e conversões informadas pelos programas.
+- [ ] Filtros/coleções SEO e curadoria de recomendações.
+
+
 ### 1 — Fundação visual e experiência de compra (em andamento)
 - [x] Nova direção de cores: creme, coral, verde-lima e grafite.
 - [x] Hero comercial e coleções na home.

@@ -62,3 +62,19 @@ Este documento complementa `ROADMAP_DESIGN_E_COMERCIAL.md`. A prioridade é evol
 - Métricas explicáveis, agregadas e consistentes com dados reais.
 - Nenhuma informação de cliente exposta no dashboard público.
 - Não alterar o canal de compra/frete sem decisão e teste da integração.
+
+
+## Precificação por marketplace — CPF e cadastro em escala
+
+### Premissas confirmadas
+- Perfil inicial: **vendedor CPF** tanto na Shopee quanto no Mercado Livre.
+- Taxas devem ser editáveis e identificadas como estimativas, com data/fonte e aviso quando dependerem de categoria, logística, programa ou condição da conta.
+- Não aplicar automaticamente sobretaxas exclusivas de CNPJ nem assumir tarifa única universal do Mercado Livre.
+- Manter custo de fabricação e margem por produto; mostrar preço sugerido, preço de equilíbrio, tarifa estimada e contribuição líquida por canal.
+
+### Checkpoints
+1. **CPF-01 — regras e transparência:** revisar fórmulas Shopee CPF e Mercado Livre CPF, explicitar faixas/tarifas e casos que exigem configuração manual; criar testes de limites de faixa.
+2. **CPF-02 — cadastro de produtos precificados:** persistir custo e premissas individualmente, permitindo recalcular um produto sem sobrescrever os demais.
+3. **CPF-03 — precificação em lote:** importar/exportar CSV, validar linhas, apresentar prévia, calcular preço por canal e exportar resultados sem gravar até confirmação.
+4. **CPF-04 — histórico:** guardar snapshots das premissas/taxas por cálculo para reproduzir preços antigos.
+5. **CPF-05 — integração oficial (futuro):** estudar APIs de marketplace e tarifas/logística retornadas por categoria/anúncio; exigir credenciais autorizadas e nunca scraping de área autenticada.

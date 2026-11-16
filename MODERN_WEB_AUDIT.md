@@ -44,6 +44,11 @@ O projeto já possui uma base sólida: páginas públicas renderizadas no servid
 3. Validar layout em 320 px, 375 px, tablet, desktop, zoom 200% e redução de movimento.
 4. Melhorar formulários administrativos: autocomplete adequado, validação após interação, erros ligados aos campos e feedback com `aria-live` quando necessário.
 
+### Fase 2 — Performance e imagens (em andamento)
+- [x] Refinamento visual e responsivo dos cards de catálogo; badges, ação de foto e legenda de preço.
+- [x] Página de produto com galeria sticky em desktop, melhor escala tipográfica e CTA destacado.
+- [x] Navegação de miniaturas por teclado (setas) e fallback de imagem.
+
 ### Fase 2 — Performance e imagens
 1. Priorizar somente a imagem LCP; manter lazy-loading para imagens fora da primeira tela.
 2. Adotar imagens responsivas (`srcset`/`sizes`) e formatos eficientes quando disponíveis no R2.

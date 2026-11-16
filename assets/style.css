@@ -419,3 +419,31 @@ html[data-design="nature"] .product-price a{background:#688b55}
 .how-grid h3{font-size:21px;letter-spacing:-.04em;margin:0 0 10px;color:#252d24}
 .how-grid p{max-width:260px;font-size:13px;line-height:1.75;color:#73796e;margin:0}
 @media(max-width:700px){.how-section{padding-top:52px;padding-bottom:55px}.how-grid{grid-template-columns:1fr}.how-grid article{min-height:175px;padding:23px}.how-icon{margin-bottom:17px}}
+
+/* Modern Web Guidance — acessibilidade e comportamento */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+ outline:3px solid #1769aa;
+ outline-offset:3px;
+}
+button:disabled,[aria-disabled="true"]{cursor:not-allowed;opacity:.62}
+html{scroll-padding-top:92px}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{
+  animation-duration:.01ms!important;
+  animation-iteration-count:1!important;
+  transition-duration:.01ms!important;
+  scroll-behavior:auto!important
+ }
+}
+@media(max-width:760px){
+ .top{height:auto;min-height:70px;flex-wrap:wrap;gap:12px;padding:14px 5vw}
+ .top nav{order:3;width:100%;gap:14px;flex-wrap:wrap;justify-content:flex-start;padding:5px 0}
+ .top nav a{padding:8px 0}
+ .admin-link{margin-left:auto}
+}
+@media(max-width:420px){
+ .promo{font-size:9px;letter-spacing:.1em}
+ .hero h1{white-space:normal}
+ .hero-copy{padding:70px 6vw 42px}
+}

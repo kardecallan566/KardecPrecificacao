@@ -447,3 +447,18 @@ html{scroll-padding-top:92px}
  .hero h1{white-space:normal}
  .hero-copy{padding:70px 6vw 42px}
 }
+
+/* Modern Web · catálogo refinado */
+.product-card{position:relative;overflow:hidden;transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
+.product-card:hover{transform:translateY(-5px);box-shadow:0 18px 36px #1c2b2018;border-color:#d8d8c9}
+.product-card:focus-within{outline:2px solid #537c43;outline-offset:3px}
+.product-photo{position:relative;display:block}.product-photo img{width:100%;height:100%;display:block}
+.product-badges{position:absolute;left:14px;top:14px;display:flex;gap:7px;flex-wrap:wrap;max-width:calc(100% - 28px)}
+.product-badges .pill,.product-badges .availability-pill{position:static;display:inline-flex;align-items:center;min-height:25px;padding:6px 10px;font-size:9px;letter-spacing:.07em;font-weight:900}
+.product-badges .availability-pill.ready{background:#e4f1d9;color:#35562c}.product-badges .availability-pill.consult{background:#f7e7d7;color:#88502d}.product-badges .affiliate-pill{background:#e7e9ff;color:#454b9a}
+.photo-action{position:absolute;right:14px;bottom:14px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fffdf5;color:#28362a;box-shadow:0 4px 14px #17212620;opacity:0;transform:translateY(5px);transition:opacity .2s,transform .2s}
+.product-card:hover .photo-action,.product-card:focus-within .photo-action{opacity:1;transform:translateY(0)}.product-body h3 a:hover{color:#b65b32}
+.product-price{display:flex;flex-direction:column;align-items:flex-start;gap:4px}.price-caption{font-size:9px;color:#92958b;font-weight:600}
+.product-detail-link{display:flex;align-items:center;justify-content:space-between;gap:10px}.product-detail-link span{transition:transform .2s}.product-detail-link:hover span{transform:translate(3px,-3px)}
+.catalog-meta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}#catalogCount{font-size:12px;font-weight:800;color:#596258}#catalogCount::before{content:'✳';color:#e2794c;margin-right:8px}
+@media(hover:none){.photo-action{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.product-card,.product-photo img,.photo-action,.product-detail-link span{transition:none!important}}

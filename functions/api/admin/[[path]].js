@@ -1,5 +1,5 @@
 import {json,fail,bodyJson,boundedBody,guardAdminMutation,slugify,text,arr,productAdmin,settings} from '../../../server/http.js';
-import {requireAdmin} from '../../../server/auth.js';
+import {requireAdmin,handleAdminAuth} from '../../../server/auth.js';
 import {calculateQuote,DEFAULT_COSTS,licenseAllowed} from '../../../server/pricing.js';
 import {lookupModel} from '../../../server/makerworld.js';
 import {normalizeSale} from '../../../server/sales.js';

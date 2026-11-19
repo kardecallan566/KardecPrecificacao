@@ -58,19 +58,24 @@ $('#view').addEventListener('submit',async e=>{e.preventDefault();const f=e.targ
  if(f.id==='settingsForm'){const data={...fObj(f),default_costs:cfg(f)};for(const k of costume)delete data[k];await api('settings','PUT',data);await refresh();render();return notice('Configurações salvas.');}
 }catch(error){notice(error.message,true)}});
 async function boot(){
-  // Oculta toda a interface enquanto a sessão é validada (fail closed).
-  document.body.style.visibility='hidden';
-  let gate=document.getElementById('authGate');
-  if(!gate){gate=document.createElement('main');gate.id='authGate';gate.style.cssText='position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:#f6f7f7;font:14px Inter,Segoe UI,Arial;color:#243333;visibility:visible';gate.innerHTML='<section style="width:min(460px,100%);padding:32px;background:white;border:1px solid #e5e9e5;border-radius:12px"><p style="color:#c47d4d;font-weight:900;letter-spacing:.15em;font-size:11px">KARDLOTTGEEK · ÁREA RESTRITA</p><h1 style="font-size:25px;margin:12px 0">Verificando acesso…</h1><p id="authMessage" style="color:#7e8a87">Validando sua sessão segura.</p></section>';document.body.appendChild(gate)}
-  try {
-    const me=await api('me');
-    gate.remove();document.body.style.visibility='visible';
-    $('#authStatus').textContent='● '+me.email;
-    await refresh();render();
-  } catch(e) {
-    const local=location.hostname==='localhost'||location.hostname==='127.0.0.1';
-    gate.innerHTML='<section style="width:min(460px,100%);padding:32px;background:white;border:1px solid #e5e9e5;border-radius:12px"><p style="color:#c47d4d;font-weight:900;letter-spacing:.15em;font-size:11px">KARDLOTTGEEK · ÁREA RESTRITA</p><h1 style="font-size:25px;margin:12px 0">Login obrigatório</h1><p style="color:#7e8a87;line-height:1.7">Sessão não validada. O painel e suas abas estão bloqueados. Autentique pelo Cloudflare Access e recarregue.</p>'+(local?'<label for="localToken">Token de desenvolvimento local</label><input id="localToken" type="password" autocomplete="off" style="display:block;width:100%;padding:12px;margin:10px 0;border:1px solid #dfe6e1;border-radius:6px"><button id="localLogin" style="padding:12px 18px;background:#ec8b55;border:0;border-radius:6px;font-weight:800;cursor:pointer">Entrar localmente</button>':'')+'<p style="color:#a04436;font-size:12px;margin-top:16px">'+String(e.message||'Acesso negado').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</p><a href="/" style="display:inline-block;margin-top:12px;color:#35564c">← Voltar à loja</a></section>';
-    if(local)gate.querySelector('#localLogin').addEventListener('click',()=>{state.localToken=gate.querySelector('#localToken').value;boot()});
-  }
+ document.body.style.visibility='hidden';
+ let gate=document.getElementById('authGate');
+ if(!gate){gate=document.createElement('main');gate.id='authGate';document.body.appendChild(gate)}
+ gate.style.cssText='position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:#f3f5f1;font:14px Inter,Segoe UI,Arial;color:#243333;visibility:visible';
+ const escapeHtml=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ try{
+  const me=await api('me');
+  gate.remove();document.body.style.visibility='visible';
+  $('#authStatus').textContent='● '+me.email;
+  const actions=$('.top-actions');
+  if(actions&&!$('#adminLogout')){const btn=document.createElement('button');btn.id='adminLogout';btn.className='btn outline';btn.textContent='Sair';actions.append(btn);btn.addEventListener('click',async()=>{try{await api('logout','POST',{});location.reload()}catch(err){notice(err.message,true)}})}
+  await refresh();render();
+ }catch(e){
+  document.body.style.visibility='visible';
+  gate.innerHTML='<section class="klg-login-card"><div class="klg-login-mark">✳ KARDLOTT<span>GEEK</span></div><p class="eyebrow">ÁREA ADMINISTRATIVA</p><h1>Acesse seu painel</h1><p class="klg-login-copy">Entre com a senha administrativa configurada nas variáveis secretas do Cloudflare.</p><form id="adminLoginForm"><label for="adminPassword">Senha de acesso</label><div class="klg-password-wrap"><input id="adminPassword" name="password" type="password" autocomplete="current-password" required minlength="1" autofocus><button type="button" id="toggleAdminPassword" aria-label="Mostrar senha">◉</button></div><p id="adminLoginError" role="alert" class="klg-login-error"></p><button class="btn orange klg-login-submit" type="submit">Entrar no painel <span>→</span></button></form><a class="klg-login-back" href="/">← Voltar à loja</a></section>';
+  $('#adminLoginForm').addEventListener('submit',async ev=>{ev.preventDefault();const input=$('#adminPassword'),submit=ev.currentTarget.querySelector('button[type=submit]'),error=$('#adminLoginError');submit.disabled=true;submit.textContent='Validando…';error.textContent='';try{await api('login','POST',{password:input.value});input.value='';await boot()}catch(err){error.textContent=err.message;input.focus()}finally{submit.disabled=false;submit.innerHTML='Entrar no painel <span>→</span>'}});
+  $('#toggleAdminPassword').addEventListener('click',()=>{const input=$('#adminPassword');input.type=input.type==='password'?'text':'password'});
+  $('#adminPassword').focus();
+ }
 }
-boot();;
+boot();

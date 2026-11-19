@@ -419,3 +419,69 @@ html[data-design="nature"] .product-price a{background:#688b55}
 .how-grid h3{font-size:21px;letter-spacing:-.04em;margin:0 0 10px;color:#252d24}
 .how-grid p{max-width:260px;font-size:13px;line-height:1.75;color:#73796e;margin:0}
 @media(max-width:700px){.how-section{padding-top:52px;padding-bottom:55px}.how-grid{grid-template-columns:1fr}.how-grid article{min-height:175px;padding:23px}.how-icon{margin-bottom:17px}}
+
+/* Modern Web Guidance — acessibilidade e comportamento */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+ outline:3px solid #1769aa;
+ outline-offset:3px;
+}
+button:disabled,[aria-disabled="true"]{cursor:not-allowed;opacity:.62}
+html{scroll-padding-top:92px}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{
+  animation-duration:.01ms!important;
+  animation-iteration-count:1!important;
+  transition-duration:.01ms!important;
+  scroll-behavior:auto!important
+ }
+}
+@media(max-width:760px){
+ .top{height:auto;min-height:70px;flex-wrap:wrap;gap:12px;padding:14px 5vw}
+ .top nav{order:3;width:100%;gap:14px;flex-wrap:wrap;justify-content:flex-start;padding:5px 0}
+ .top nav a{padding:8px 0}
+ .admin-link{margin-left:auto}
+}
+@media(max-width:420px){
+ .promo{font-size:9px;letter-spacing:.1em}
+ .hero h1{white-space:normal}
+ .hero-copy{padding:70px 6vw 42px}
+}
+
+/* Modern Web · catálogo refinado */
+.product-card{position:relative;overflow:hidden;transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
+.product-card:hover{transform:translateY(-5px);box-shadow:0 18px 36px #1c2b2018;border-color:#d8d8c9}
+.product-card:focus-within{outline:2px solid #537c43;outline-offset:3px}
+.product-photo{position:relative;display:block}.product-photo img{width:100%;height:100%;display:block}
+.product-badges{position:absolute;left:14px;top:14px;display:flex;gap:7px;flex-wrap:wrap;max-width:calc(100% - 28px)}
+.product-badges .pill,.product-badges .availability-pill{position:static;display:inline-flex;align-items:center;min-height:25px;padding:6px 10px;font-size:9px;letter-spacing:.07em;font-weight:900}
+.product-badges .availability-pill.ready{background:#e4f1d9;color:#35562c}.product-badges .availability-pill.consult{background:#f7e7d7;color:#88502d}.product-badges .affiliate-pill{background:#e7e9ff;color:#454b9a}
+.photo-action{position:absolute;right:14px;bottom:14px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fffdf5;color:#28362a;box-shadow:0 4px 14px #17212620;opacity:0;transform:translateY(5px);transition:opacity .2s,transform .2s}
+.product-card:hover .photo-action,.product-card:focus-within .photo-action{opacity:1;transform:translateY(0)}.product-body h3 a:hover{color:#b65b32}
+.product-price{display:flex;flex-direction:column;align-items:flex-start;gap:4px}.price-caption{font-size:9px;color:#92958b;font-weight:600}
+.product-detail-link{display:flex;align-items:center;justify-content:space-between;gap:10px}.product-detail-link span{transition:transform .2s}.product-detail-link:hover span{transform:translate(3px,-3px)}
+.catalog-meta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}#catalogCount{font-size:12px;font-weight:800;color:#596258}#catalogCount::before{content:'✳';color:#e2794c;margin-right:8px}
+@media(hover:none){.photo-action{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.product-card,.product-photo img,.photo-action,.product-detail-link span{transition:none!important}}
+
+/* Catálogo KLG · consistência de cartões, filtros e estados */
+.catalog{scroll-margin-top:92px}
+.filter-row{align-items:center;gap:16px}
+.filter-row>input{min-width:min(100%,280px);border:1px solid #e5e0d6;border-radius:100px;background:#fffdf8;padding:13px 18px;color:#2e382b;outline-offset:3px}
+.filter-groups{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.filter-groups .chips{display:flex;gap:7px;flex-wrap:wrap}
+.filter-groups .chip{min-height:38px;padding:9px 14px;border:1px solid #e5e0d6;border-radius:100px;background:#fffdf8;color:#687265;font-size:10px;font-weight:800;transition:background .2s,border-color .2s,color .2s}
+.filter-groups .chip:hover{border-color:#a9b99c;color:#34472e}
+.filter-groups .chip.active{background:#2e3b2e;border-color:#2e3b2e;color:#f5f4e9}
+.catalog-meta{padding:16px 0;margin:18px 0 22px}
+.catalog-meta select{min-height:38px;cursor:pointer}
+.product-grid{align-items:stretch}
+.product-card{display:flex;flex-direction:column;min-width:0;background:#fffdf8;border:1px solid #e9e4da;border-radius:17px}
+.product-photo{aspect-ratio:1/1;min-height:0;background:radial-gradient(circle at 50% 42%,#fffefb,#efede4);border-radius:16px 16px 0 0}
+.product-photo img{height:100%;object-fit:contain}
+.product-body{display:flex;flex:1;flex-direction:column;align-items:flex-start;gap:8px}
+.product-body h3{line-height:1.35;min-height:2.7em}
+.product-price{margin-top:auto;padding-top:8px}
+.product-detail-link{width:100%;margin-top:10px;padding-top:12px;border-top:1px solid #eee9df}
+.empty-state{grid-column:1/-1;padding:clamp(30px,6vw,60px);border:1px dashed #d9ddcf;border-radius:18px;background:#faf9f3;text-align:center;color:#737b6c;line-height:1.8}
+@media(max-width:760px){.filter-row{align-items:stretch;flex-direction:column}.filter-row>input{width:100%}.filter-groups{justify-content:flex-start;flex-direction:column;align-items:flex-start}.filter-groups .chips{width:100%}.filter-groups .chip{flex:0 0 auto}.product-body{gap:6px}.product-body h3{min-height:0}}
+@media(max-width:420px){.product-grid{gap:10px}.product-card{border-radius:13px}.product-photo{border-radius:12px 12px 0 0}.product-body{padding:11px}.product-body h3{font-size:12px}.product-price b{font-size:17px}.product-detail-link{font-size:9px}}

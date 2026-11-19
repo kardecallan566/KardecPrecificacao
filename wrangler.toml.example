@@ -12,7 +12,7 @@ database_id = "COLE-SEU-DATABASE-ID"
 binding = "MEDIA"
 bucket_name = "zynutz-3d-media"
 
-# Secrets via Cloudflare Pages > Settings > Variables and Secrets:
+# Secrets via Cloudflare Pages > Settings > Variables and Secrets:\n# ADMIN_PASSWORD = senha forte (mínimo 12 caracteres; configurar como Secret)\n# ADMIN_EMAIL = e-mail/identificação exibida no painel (opcional)\n# LOCAL_DEV = true e LOCAL_DEV_TOKEN somente para desenvolvimento local (NUNCA commit).\n > Settings > Variables and Secrets:
 # CF_ACCESS_TEAM_DOMAIN = "seu-time.cloudflareaccess.com"
 # CF_ACCESS_AUD = "AUD_DO_APP_ACCESS"
 # ADMIN_EMAIL = "seu-email@exemplo.com"

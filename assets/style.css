@@ -462,3 +462,26 @@ html{scroll-padding-top:92px}
 .product-detail-link{display:flex;align-items:center;justify-content:space-between;gap:10px}.product-detail-link span{transition:transform .2s}.product-detail-link:hover span{transform:translate(3px,-3px)}
 .catalog-meta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}#catalogCount{font-size:12px;font-weight:800;color:#596258}#catalogCount::before{content:'✳';color:#e2794c;margin-right:8px}
 @media(hover:none){.photo-action{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.product-card,.product-photo img,.photo-action,.product-detail-link span{transition:none!important}}
+
+/* Catálogo KLG · consistência de cartões, filtros e estados */
+.catalog{scroll-margin-top:92px}
+.filter-row{align-items:center;gap:16px}
+.filter-row>input{min-width:min(100%,280px);border:1px solid #e5e0d6;border-radius:100px;background:#fffdf8;padding:13px 18px;color:#2e382b;outline-offset:3px}
+.filter-groups{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.filter-groups .chips{display:flex;gap:7px;flex-wrap:wrap}
+.filter-groups .chip{min-height:38px;padding:9px 14px;border:1px solid #e5e0d6;border-radius:100px;background:#fffdf8;color:#687265;font-size:10px;font-weight:800;transition:background .2s,border-color .2s,color .2s}
+.filter-groups .chip:hover{border-color:#a9b99c;color:#34472e}
+.filter-groups .chip.active{background:#2e3b2e;border-color:#2e3b2e;color:#f5f4e9}
+.catalog-meta{padding:16px 0;margin:18px 0 22px}
+.catalog-meta select{min-height:38px;cursor:pointer}
+.product-grid{align-items:stretch}
+.product-card{display:flex;flex-direction:column;min-width:0;background:#fffdf8;border:1px solid #e9e4da;border-radius:17px}
+.product-photo{aspect-ratio:1/1;min-height:0;background:radial-gradient(circle at 50% 42%,#fffefb,#efede4);border-radius:16px 16px 0 0}
+.product-photo img{height:100%;object-fit:contain}
+.product-body{display:flex;flex:1;flex-direction:column;align-items:flex-start;gap:8px}
+.product-body h3{line-height:1.35;min-height:2.7em}
+.product-price{margin-top:auto;padding-top:8px}
+.product-detail-link{width:100%;margin-top:10px;padding-top:12px;border-top:1px solid #eee9df}
+.empty-state{grid-column:1/-1;padding:clamp(30px,6vw,60px);border:1px dashed #d9ddcf;border-radius:18px;background:#faf9f3;text-align:center;color:#737b6c;line-height:1.8}
+@media(max-width:760px){.filter-row{align-items:stretch;flex-direction:column}.filter-row>input{width:100%}.filter-groups{justify-content:flex-start;flex-direction:column;align-items:flex-start}.filter-groups .chips{width:100%}.filter-groups .chip{flex:0 0 auto}.product-body{gap:6px}.product-body h3{min-height:0}}
+@media(max-width:420px){.product-grid{gap:10px}.product-card{border-radius:13px}.product-photo{border-radius:12px 12px 0 0}.product-body{padding:11px}.product-body h3{font-size:12px}.product-price b{font-size:17px}.product-detail-link{font-size:9px}}

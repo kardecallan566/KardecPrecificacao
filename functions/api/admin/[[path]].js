@@ -41,8 +41,15 @@ async function updateProduct(db,id,v){let p=normalizeProduct(v);const old=await 
  const result=await db.batch(stmts);
  if(result[0].meta.changes!==1)return json({error:'Estoque alterado por outra operação: atualize a lista e tente novamente'},409);
  return json({ok:true,id});}
-export async function onRequest(context){const auth=await requireAdmin(context);if(auth.error)return auth.error;
- const {request,env}=context;const rejected=guardAdminMutation(request);if(rejected)return rejected;let path=new URL(request.url).pathname.replace(/^\/api\/admin\/?/,'').split('/').filter(Boolean);const method=request.method;
+export async function onRequest(context){
+ const {request,env}=context;
+ const path=new URL(request.url).pathname.replace(/^\\/api\\/admin\\/?/,'').split('/').filter(Boolean);
+ const rejected=guardAdminMutation(request);if(rejected)return rejected;
+ if(path[0]==='login'||path[0]==='logout'){
+  try{return await handleAdminAuth(request,env,path[0])||json({error:'Método não permitido'},405)}catch(e){return fail(e)}
+ }
+ const auth=await requireAdmin(context);if(auth.error)return auth.error;
+ const method=request.method;
  try{
   if(path[0]==='me'&&method==='GET')return json({email:auth.user.email});
   if(path[0]==='lookup'&&method==='POST'){const b=await bodyJson(request);return json(await lookupModel(String(b.url||'')));}

@@ -43,7 +43,7 @@ async function updateProduct(db,id,v){let p=normalizeProduct(v);const old=await 
  return json({ok:true,id});}
 export async function onRequest(context){
  const {request,env}=context;
- const path=new URL(request.url).pathname.replace(/^\\/api\\/admin\\/?/,'').split('/').filter(Boolean);
+ const path=new URL(request.url).pathname.slice('/api/admin/'.length).split('/').filter(Boolean);
  const rejected=guardAdminMutation(request);if(rejected)return rejected;
  if(path[0]==='login'||path[0]==='logout'){
   try{return await handleAdminAuth(request,env,path[0])||json({error:'Método não permitido'},405)}catch(e){return fail(e)}

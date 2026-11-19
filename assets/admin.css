@@ -32,3 +32,14 @@
 .preview-cartoon{background:radial-gradient(circle,#f8c3a0,#fb856d)}.preview-cartoon i{border-radius:18px 18px 12px 12px}.preview-tech{background:linear-gradient(135deg,#071b2a,#087d87);background-image:linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px);background-size:16px 16px}.preview-tech i{border-radius:5px;background:linear-gradient(130deg,#c6fff3,#16b8b5)}.preview-space{background:radial-gradient(circle at 70% 20%,#6e52a9,#10152f 65%);}.preview-space:after{content:"✦ · ✧ · ✦";position:absolute;top:12px;left:15px;color:#e3d5ff;font-size:13px}.preview-space i{background:linear-gradient(130deg,#e8dcff,#9b81e8)}
 .season-preview{border-radius:12px;min-height:95px;margin-top:18px;padding:20px;display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#f4eee5,#fff9f1);color:#3a3344}.season-preview>span{font-size:35px}.season-preview strong{font-size:15px}.season-preview small{margin-left:auto;color:#8a8492;font-size:11px}.season-halloween{background:linear-gradient(120deg,#2a1838,#f08a36);color:white}.season-christmas{background:linear-gradient(120deg,#164735,#b8e5cf);color:white}.season-valentine{background:linear-gradient(120deg,#7e284d,#f5b7ce);color:white}.season-easter{background:linear-gradient(120deg,#7861a8,#e9c9ed);color:white}.season-june{background:linear-gradient(120deg,#a65728,#f5d47c);color:#38251a}
 @media(max-width:900px){.appearance-designs{grid-template-columns:1fr}.appearance-option small{min-height:0}.appearance-preview{height:115px}}
+
+/* Login administrativo KLG */
+.klg-login-card{width:min(440px,100%);padding:clamp(26px,5vw,42px);background:#fff;border:1px solid #e3e9df;border-radius:22px;box-shadow:0 28px 90px #20352918}
+.klg-login-mark{font-size:19px;font-weight:950;letter-spacing:-.08em;color:#203b32;margin-bottom:32px}.klg-login-mark span{color:#ec8b55}
+.klg-login-card .eyebrow{margin:0 0 10px}.klg-login-card h1{font-size:30px;letter-spacing:-.06em;margin:0 0 10px;color:#243b32}
+.klg-login-copy{color:#77847c;line-height:1.7;margin:0 0 26px}.klg-login-card form>label{display:block;font-size:11px;font-weight:850;color:#52665b;margin-bottom:8px}
+.klg-password-wrap{display:flex;border:1px solid #dce5dc;border-radius:10px;overflow:hidden}.klg-password-wrap:focus-within{outline:3px solid #dcebd5;border-color:#789c6b}
+.klg-password-wrap input{flex:1;min-width:0;border:0;padding:14px;background:#fff;outline:0}.klg-password-wrap button{border:0;background:#f5f7f2;padding:0 15px;color:#52665b}
+.klg-login-error{min-height:18px;color:#b34e3d;font-size:12px;margin:9px 0}.klg-login-submit{width:100%;padding:14px;border-radius:10px}.klg-login-submit span{float:right}
+.klg-login-back{display:inline-block;margin-top:23px;color:#718176;font-size:12px}
+@media(max-width:480px){.klg-login-card{border-radius:16px}.klg-login-card h1{font-size:26px}}
